@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:fields>
+        <bm:field name="verification_id"  databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="verification_no" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="verification_date" datatype="java.lang.String"  />
+        <bm:field name="contract_no" databaseType="VARCHAR2" datatype="java.lang.String" />
+        <bm:field name="creditor_project" databaseType="VARCHAR2" datatype="java.lang.String" />
+        <bm:field name="verification_fee" databaseType="VARCHAR2" datatype="java.lang.String" />
+        <bm:field name="source_type" databaseType="VARCHAR2" datatype="java.lang.String" />
+        <bm:field name="source_object" databaseType="VARCHAR2" datatype="java.lang.String" />
+        <bm:field name="receipt_no" databaseType="VARCHAR2" datatype="java.lang.String" />
+        <bm:field name="currency" databaseType="VARCHAR2" datatype="java.lang.String" />
+        <bm:field name="message" databaseType="VARCHAR2" datatype="java.lang.String" />
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:update-sql><![CDATA[
+                select
+                       verification_id ,
+                       verification_no ,
+                       contract_no ,
+                       nvl((sys_code_pkg.get_sys_code_value_name('HLS_FEE_ITEMS', creditor_project)), '租金') creditor_project ,
+                       to_char(creation_date, 'yyyy-mm-dd') verification_date ,
+                       (sys_code_pkg.get_sys_code_value_name('HLS_SOURCE_TYPE', source_type)) source_type ,
+                       source_object ,
+                       receipt_no ,
+                       currency ,
+                       message ,
+                       verification_fee ,
+                       creation_date ,
+                       created_by ,
+                       last_updated_by ,
+                       last_update_date
+                from hls_payment_verification
+                #WHERE_CLAUSE#
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <!--查询页面用-->
+        <bm:query-field name="verification_no" queryExpression="verification_no = ${@verification_no}"/>
+        <bm:query-field name="contract_no" queryExpression="contract_no = ${@contract_no}"/>
+        <bm:query-field name="creditor_project" queryExpression="creditor_project = ${@creditor_project_code}"/>
+
+        <bm:query-field name="verification_start_date" queryExpression="to_char(creation_date, 'yyyy-mm-dd') >= ${@verification_start_date}"/>
+        <bm:query-field name="verification_end_date" queryExpression=" ${@verification_end_date} >= to_char(creation_date, 'yyyy-mm-dd')"/>
+        <bm:query-field name="source_type" queryExpression="source_type = ${@source_type_code}"/>
+        <bm:query-field name="source_object" queryExpression="source_object = ${@source_object}"/>
+
+
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query  defaultWhereClause="personnel_no=${/parameter/@personnel_no}" model="hls_rent.RENT200.hls_staff_info_search" rootPath="alter_model"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+
+            <!--修改页面关闭-->
+            function alterScreen_close() {
+                $('hls_hrms_hsm_staff_info_alter').close();
+            }
+
+    		<!--修改按钮-->
+    		function updateDs_alter(){
+    		//debugger;
+    		    var personnel_no = '${/parameter/@personnel_no}';
+    		    console.log(personnel_no);
+    		    $('HLS_staff_info_input_ds').setSubmitUrl("${/request/@context_path}/autocrud/hls_rent.RENT200.hls_staff_info_search/batch_update"+'?personnel_no='+personnel_no);
+                $('HLS_staff_info_input_ds').submit();
+    		}
+
+            <!--修改成功后处理-->
+            function onSubmitSuccess_alterDs(dataSet, datas, res){
+                HLS_staff_infoSearch();
+                alterScreen_close();
+            }
+
+            <!--判断电话号码是否有效-->
+            function validate_telNumber(record, name, value){
+                if(name == 'phone_number'){
+                    var phone_number = record.get('phone_number');
+                    if(typeof(phone_number) != 'undefined' && !Ext.isEmpty(phone_number)){
+                        if(!(/^1[3|4|5|8][0-9]\d{4,8}$/.test(phone_number))){
+                            return '请输入正确的手机号码';
+                        }
+                    }
+                    return true;
+                }
+            }
+
+        ]]></script>
+
+        <a:dataSets>
+            <!-- 性别-->
+            <a:dataSet id="HLS_gender_Ds" lookupCode="HLS211_GENDER"/>
+            <!-- 所在部门-->
+            <a:dataSet id="HLS_dept_Ds" lookupCode="HLS_DEPT_TYPE"/>
+            <!-- base地-->
+            <a:dataSet id="HLS_base_Ds" lookupCode="HLS_BASE_TYPE"/>
+            <!-- 入住人员信息-->
+            <a:dataSet id="HLS_staff_info_input_ds" model="hls_rent.RENT200.hls_staff_info_search" autoCreate="true">
+
+                <a:datas dataSource="/model/alter_model"/>
+                <a:fields>
+
+                    <a:field name="personnel_no"  readOnly="true"/>
+                    <a:field name="staff_no" required="true"/>
+                    <a:field name="name" required="true"/>
+                    <a:field name="gender_code" />
+                    <a:field name="gender" required="true" displayField="code_value_name" options="HLS_gender_Ds" returnField="gender_code"  valueField="code_value"/>
+                    <a:field name="department_code" />
+                    <a:field name="department" required="true" displayField="code_value_name" options="HLS_dept_Ds" returnField="department_code"  valueField="code_value"/>
+                    <a:field name="base_in_code" />
+                    <a:field name="base_in" required="true" displayField="code_value_name" options="HLS_base_Ds" returnField="base_in_code"  valueField="code_value"/>
+                    <a:field name="phone_number" validator="validate_telNumber"/>
+                    <a:field name="email"/>
+                    <a:field name="message"/>
+                </a:fields>
+
+                <a:events>
+                    <a:event name="submitsuccess" handler="onSubmitSuccess_alterDs"/>
+                </a:events>
+
+            </a:dataSet>
+        </a:dataSets>
+
+        <a:screenBody>
+            <a:form style="width:100%" title="入住人员信息：${/parameter/@personnel_no}">
+                <a:box column="3" style="width:100%">
+
+                    <a:textField name="personnel_no" bindTarget="HLS_staff_info_input_ds" prompt="入住人员编号"/>
+                    <a:textField name="staff_no" bindTarget="HLS_staff_info_input_ds" prompt="入住人员工号"/>
+                    <a:textField name="name" bindTarget="HLS_staff_info_input_ds" prompt="入住人员姓名"/>
+                    <a:comboBox name="gender" bindTarget="HLS_staff_info_input_ds" prompt="性别"/>
+                    <a:comboBox name="department" bindTarget="HLS_staff_info_input_ds" prompt="所在部门"/>
+                    <a:comboBox name="base_in" bindTarget="HLS_staff_info_input_ds" prompt="base地"/>
+                    <a:textField name="phone_number" bindTarget="HLS_staff_info_input_ds" prompt="联系电话"/>
+                    <a:textField name="email" bindTarget="HLS_staff_info_input_ds" prompt="邮箱地址"/>
+                    <a:textField name="message" bindTarget="HLS_staff_info_input_ds" prompt="备注"/>
+
+                </a:box>
+                <a:screenTopToolbar>
+                    <a:toolbarButton click="updateDs_alter" text="修改" width="80"/>
+                    <a:toolbarButton click="alterScreen_close" text="关闭" width="80"/>
+                </a:screenTopToolbar>
+            </a:form>
+
+        </a:screenBody>
+    </a:view>
+</a:screen>
+

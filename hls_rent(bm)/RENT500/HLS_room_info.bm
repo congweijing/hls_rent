@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="HLS_ROOM_INFO">
+<bm:fields>
+    <bm:field name="room_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ROOM_ID" prompt="房屋ID"/>
+    <bm:field name="room_no" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_NO" forDisplay="true"  prompt="房屋编号"/>
+    <bm:field name="room_abbr" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_ABBR" forDisplay="true"  forQuery="true" prompt="房屋简称"/>
+    <bm:field name="room_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_TYPE" forDisplay="true" forQuery="true"  prompt="房屋类型"/>
+    <bm:field name="room_area" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_AREA" forDisplay="true"  prompt="房屋面积"/>
+    <bm:field name="bed" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BED" prompt="床位"/>
+    <bm:field name="bed_used" databaseType="NUMBER" datatype="java.lang.Long" physicalName="bed_used" />
+    <bm:field name="bed_free" databaseType="NUMBER" datatype="java.lang.Long" physicalName="bed_free" />
+    <!--<bm:field name="bed" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BED" prompt="床位"/>-->
+    <bm:field name="landlord_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LANDLORD_NAME"  forQuery="true"  prompt="房东姓名"/>
+    <bm:field name="landlord_tel" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LANDLORD_TEL" forQuery="true"  prompt="联系电话"/>
+    <bm:field name="intermediary" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INTERMEDIARY"  prompt="中介名称"/>
+    <bm:field name="intermediary_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INTERMEDIARY_NAME"  prompt="中介联系人"/>
+    <bm:field name="intermediary_tel" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INTERMEDIARY_TEL"  prompt="中介联系电话"/>
+    <bm:field name="message" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MESSAGE" prompt="备注"/>
+    <bm:field name="room_addr_country" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_ADDR_COUNTRY" prompt="国家"/>
+    <bm:field name="room_addr_province" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_ADDR_PROVINCE" prompt="省"/>
+    <bm:field name="room_addr_city" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_ADDR_CITY" prompt="市"/>
+    <bm:field name="ROOM_STATUS" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_STATUS"   prompt="房屋状态"/>
+</bm:fields>
+<bm:features>
+    <f:standard-who xmlns:f="aurora.database.features"/>
+</bm:features>
+<bm:operations>
+    <bm:operation name="query">
+        <bm:query-sql><![CDATA[
+            select * from (select
+                room_id,
+                room_no,
+                room_abbr,
+                (sys_code_pkg.get_sys_code_value_name('HLS_HOUSE_TYPE', room_type)) room_type,
+                (sys_code_pkg.get_sys_code_value_name('HLS_HOUSE_AREA', room_area)) room_area,
+                bed,
+                bed_used,
+                bed_free,
+                landlord_name,
+                landlord_tel,
+                intermediary,
+                intermediary_name,
+                intermediary_tel,
+                message,
+                (select fc.description from fnd_country fc where fc.country_id = room_addr_country) room_addr_country,
+                (select fc.description from fnd_province fc where fc.province_id = room_addr_province) room_addr_province,
+                (select fc.description from fnd_city fc where fc.city_id = room_addr_city) room_addr_city,
+                room_status
+                from hls_room_info
+                where ROOM_STATUS='status1' and room_id not in(select room_id from HLS_Contract_info))  #WHERE_CLAUSE#
+           	]]></bm:query-sql>
+        <!--<bm:parameters>-->
+            <!--<bm:parameter/>-->
+        <!--</bm:parameters>-->
+    </bm:operation>
+</bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="room_abbr" queryExpression="room_abbr like &apos;%&apos;||${@room_abbr}||&apos;%&apos;"/>
+        <bm:query-field name="landlord_name" queryExpression="landlord_name = ${@landlord_name}"/>
+        <bm:query-field name="landlord_tel" queryExpression="landlord_tel = ${@landlord_tel}"/>
+        <bm:query-field name="room_type" queryExpression="room_type = ${@room_type}"/>
+        <!--<bm:query-field field="room_abbr" queryOperator="like"/>-->
+        <!--<bm:query-field field="room_type" queryOperator="="/>-->
+        <!--<bm:query-field field="landlord_name" queryOperator="="/>-->
+        <!--<bm:query-field field="landlord_tel" queryOperator="like"/>-->
+    </bm:query-fields>
+</bm:model>

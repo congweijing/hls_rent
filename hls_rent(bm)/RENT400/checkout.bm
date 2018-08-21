@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="HLS_HSM">
+    <bm:fields>
+        <bm:field name="room_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ROOM_ID" />
+        <bm:field name="staff_no" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="STAFF_NO" prompt="入住人员工号"/>
+        <bm:field name="name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="NAME" forQuery="true" forDisplay="true" prompt="姓名"/>
+        <bm:field name="gender" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="GENDER" forDisplay="true" prompt="性别"/>
+        <bm:field name="department" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DEPARTMENT" forDisplay="true" prompt="所在部门"/>
+        <bm:field name="base_in" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BASE_IN" forDisplay="true" prompt="base地"/>
+        <bm:field name="contract_no" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="contract_no"/>
+        <bm:field name="people_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PEOPLE_STATUS" prompt="HLS_HSM.PEOPLE_STATUS"/>
+        <bm:field name="email" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EMAIL" prompt="邮箱"/>
+        <bm:field name="room_abbr" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_ABBR" forDisplay="true"  forQuery="true" prompt="房屋简称"/>
+        <bm:field name="room_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_TYPE" forDisplay="true" forQuery="true"  prompt="房屋类型"/>
+        <bm:field name="phone_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PHONE_NUMBER" prompt="HLS_HSM.PHONE_NUMBER"/>
+        <bm:field name="leaving_date" databaseType="DATE" datatype="java.util.Date" physicalName="LEAVING_DATE" prompt="HLS_HSM.LEAVING_DATE"/>
+        <bm:field name="live_start_date" databaseType="DATE" datatype="java.util.Date" physicalName="live_start_date" />
+        <bm:field name="rent_dates" databaseType="NUMBER" datatype="java.lang.Long" physicalName="入住天数" />
+
+    </bm:fields>
+    <bm:features>
+        <f:standard-who xmlns:f="aurora.database.features"/>
+    </bm:features>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+               select *
+               from
+               (select hsm.contract_no,
+                      hsm.staff_no,
+                      hsm.name,
+                      (sys_code_pkg.get_sys_code_value_name('HLS211_GENDER',hsm.gender)) gender,
+                      (sys_code_pkg.get_sys_code_value_name('HLS_DEPT_TYPE',hsm.department)) department,
+                       (sys_code_pkg.get_sys_code_value_name('HLS_BASE_TYPE',hsm.base_in)) base_in,
+                      hsm.phone_number,
+                      hri.room_abbr,
+                       (sys_code_pkg.get_sys_code_value_name('HLS_HOUSE_TYPE',hri.room_type)) room_type,
+                      hci.room_id,
+                      hsm.email,
+                      hsm.leaving_date,
+                      hsm.live_start_date,
+                      sysdate-hsm.live_start_date rent_dates,
+                      (sys_code_pkg.get_sys_code_value_name('HLS_STAFF_STATUS',hsm.people_status)) people_status
+
+               from hls_hsm hsm,hls_room_info hri,HLS_Contract_info hci
+               where hsm.contract_no=hci.h_contract_number
+               AND hci.room_id=hri.room_id
+               AND hsm.people_status='type2') t                 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field field="staff_no" queryOperator="="/>
+        <bm:query-field field="name" queryOperator="like"/>
+        <bm:query-field field="phone_number" queryOperator="="/>
+        <bm:query-field field="gender" queryOperator="="/>
+        <bm:query-field field="department" queryOperator="="/>
+        <bm:query-field field="base_in" queryOperator="="/>
+        <bm:query-field field="room_abbr" queryOperator="="/>
+        <bm:query-field field="live_start_date" queryOperator="="/>
+        <bm:query-field field="leaving_date" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

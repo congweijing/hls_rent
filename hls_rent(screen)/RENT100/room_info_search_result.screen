@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="room_no=${/parameter/@room_no}" model="hls_rent.RENT100.hls_room_info" rootPath="link_path" />
+    </a:init-procedure>
+    <a:view>
+        <a:dataSets>
+            <a:dataSet id="RENT100_room_info_search_result_ds" model="hls_rent.RENT100.hls_room_info" autoCreate="true">
+                <a:datas dataSource="/model/link_path"/>
+                <a:fields>
+                    <a:field name="room_type" readOnly="true" />
+                    <a:field name="room_area" readOnly="true" />
+                    <a:field name="bed_free" readOnly="true"/>
+                    <a:field name="landlord_name" readOnly="true"/>
+                    <a:field name="landlord_tel" readOnly="true"/>
+                    <a:field name="room_addr_country" readOnly="true"/>
+                    <a:field name="room_addr_province" readOnly="true"/>
+                    <a:field name="room_addr_city" readOnly="true"/>
+                    <a:field name="room_abbr" readOnly="true"/>
+                    <a:field name="intermediary" readOnly="true"/>
+                    <a:field name="intermediary_name" readOnly="true"/>
+                    <a:field name="intermediary_tel" readOnly="true"/>
+                    <a:field name="message" readOnly="true"/>
+                </a:fields>
+                <!--<a:events>-->
+                    <!--<a:event name="update" handler="onCountryUpdate"/>-->
+                <!--</a:events>-->
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form id="" style="width:100%" title="">
+                <a:box id="" column="3" style="width:100%">
+                    <a:textField name="room_type"  bindtarget="RENT100_room_info_search_result_ds" prompt="房屋类型"/>
+                    <a:textField name="room_area" bindtarget="RENT100_room_info_search_result_ds" prompt="房屋面积"/>
+                    <a:textField name="bed_free" bindtarget="RENT100_room_info_search_result_ds" prompt="床位"/>
+                    <a:textField name="landlord_name" bindtarget="RENT100_room_info_search_result_ds" prompt="房东姓名"/>
+                    <a:textField name="landlord_tel" bindtarget="RENT100_room_info_search_result_ds" prompt="联系电话"/>
+                    <!--<a:textField name="" bindtarget="" prompt="房屋地址"/>-->
+                </a:box>
+                <a:box id="" column="4" style="width:100%">
+                    <a:textField name="room_addr_country" bindtarget="RENT100_room_info_search_result_ds" prompt="房屋地址：国家"/>
+                    <a:textField name="room_addr_province" bindtarget="RENT100_room_info_search_result_ds" prompt="省"/>
+                    <a:textField name="room_addr_city" bindtarget="RENT100_room_info_search_result_ds" prompt="市"/>
+
+                </a:box>
+                <a:box id="" column="3" style="width:100%">
+                    <a:textField name="room_abbr" bindtarget="RENT100_room_info_search_result_ds" prompt="房屋简称"/>
+                    <a:textField name="intermediary" bindtarget="RENT100_room_info_search_result_ds" prompt="中介名称"/>
+                    <a:textField name="intermediary_name" bindtarget="RENT100_room_info_search_result_ds" prompt="中介联系人"/>
+                    <a:textField name="intermediary_tel" bindtarget="RENT100_room_info_search_result_ds" prompt="中介联系电话"/>
+                    <a:textField name="message" bindtarget="RENT100_room_info_search_result_ds" prompt="备注"/>
+                </a:box>
+                <!--<a:screenTopToolbar>-->
+                    <!--<a:toolbarButton click="RENT100_saveRoomInfo" text="保存" width="80"/>-->
+                <!--</a:screenTopToolbar>-->
+            </a:form>
+
+        </a:screenBody>
+    </a:view>
+</a:screen>

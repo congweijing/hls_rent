@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="HLS_HSM" trace="true">
+    <bm:fields>
+        <bm:field name="room_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ROOM_ID" />
+        <bm:field name="staff_no" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="STAFF_NO" prompt="入住人员工号"/>
+        <!--<bm:field name="name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="NAME" forQuery="true" forDisplay="true" prompt="姓名"/>-->
+        <!--<bm:field name="gender" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="GENDER" forDisplay="true" prompt="性别"/>-->
+        <!--<bm:field name="department" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DEPARTMENT" forDisplay="true" prompt="所在部门"/>-->
+        <!--<bm:field name="base_in" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BASE_IN" forDisplay="true" prompt="base地"/>-->
+        <!--<bm:field name="contract_no" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="contract_no"/>-->
+        <!--<bm:field name="people_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PEOPLE_STATUS" prompt="HLS_HSM.PEOPLE_STATUS"/>-->
+        <!--<bm:field name="email" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EMAIL" prompt="邮箱"/>-->
+        <!--<bm:field name="room_abbr" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_ABBR" forDisplay="true"  forQuery="true" prompt="房屋简称"/>-->
+        <!--<bm:field name="room_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_TYPE" forDisplay="true" forQuery="true"  prompt="房屋类型"/>-->
+        <!--<bm:field name="phone_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PHONE_NUMBER" prompt="HLS_HSM.PHONE_NUMBER"/>-->
+        <!--<bm:field name="leaving_date" databaseType="DATE" datatype="java.util.Date" physicalName="LEAVING_DATE" prompt="HLS_HSM.LEAVING_DATE"/>-->
+        <!--<bm:field name="live_start_date" databaseType="DATE" datatype="java.util.Date" physicalName="live_start_date" />-->
+
+    </bm:fields>
+    <bm:features>
+        <f:standard-who xmlns:f="aurora.database.features"/>
+    </bm:features>
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            begin
+                Hls_check_out.checkout(p_staff_no => ${@staff_no},
+                                       p_room_id  => ${@room_id},
+                                       p_check_out_date   => to_date(${@check_out_date},'yyyy-mm-dd hh24:mi:ss')
+                                       );
+            end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+
+</bm:model>

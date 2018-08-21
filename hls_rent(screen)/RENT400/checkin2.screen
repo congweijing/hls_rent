@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="h_contract_number=${/parameter/@h_contract_number}" model="hls_rent.RENT500.HLS_room_contract_info" rootPath="link_path" />
+    </a:init-procedure>
+    <!--<a:link id="hls_checkin1" url="${/request/@context_path}/modules/train/TRA1010/checkin1.screen"/>-->
+    <a:view>
+        <script><![CDATA[
+            //格式化日期
+            function formatDate(value,record,name){
+                return value.substring(0,10);
+            }
+            //新增一条记录
+            function new_hsm(){
+                var bed_free = $('checkin_detial_window').params.record.data['bed_free'];
+                var undetermined_beds = $('HLS_create_people_info_ds').getAll().length;
+                console.log(bed_free);
+                console.log(undetermined_beds);
+                if ( undetermined_beds < bed_free) {
+                    var ds=$('HLS_create_people_info_ds');
+                    ds.create();
+                }else {
+                    Aurora.showInfoMessage('入住提示','床位已满!',null,null,null);
+                }
+            }
+            function openWindow() {
+                history.go(0);
+            }
+            //保存记录
+            function record_save(){
+                var h_contract_number = $('Hls_hsm_ds').getAll()[0].data.h_contract_number;
+                var room_id = $('Hls_hsm_ds').getAll()[0].data.room_id;
+                var records = $('HLS_create_people_info_ds').getAll();
+                var createPeopleInfoRecord = $('HLS_create_people_info_ds');
+                //console.log(records.data);
+                var staffArray = []; //保存员工编号
+                for(var i =0;i<createPeopleInfoRecord.data.length;i++){
+                    staffArray.push(createPeopleInfoRecord.data[i].get('staff_no'))
+                }
+                //判断员工编号是否重复
+                for(var m=0;m<staffArray.length;m++){
+                    for(var n=m+1;n<staffArray.length;n++){
+                        if(staffArray[m]==staffArray[n]){
+                            Aurora.showErrorMessage('错误','人员重复');
+                            return;
+                        }
+                    }
+                }
+                console.log(staffArray);
+                //给每条记录增加合同编号和房屋编号
+                for ( var i = 0; i < records.length ; i++) {
+                    records[i].set("h_contract_number", h_contract_number);
+                    records[i].set("room_id", room_id);
+                }
+                $('HLS_create_people_info_ds').setSubmitUrl("${/request/@context_path}/modules/hls_rent/RENT400/checkin_save.svc");
+                $('HLS_create_people_info_ds').submit();
+            }
+            //保存成功触发函数
+            function onSubmitSuccess_record_save(){
+                $('checkin_detial_window').close();
+                hls_house_query();
+            }
+            //新增一条记录
+            function HLS1050_add_record(){
+                var ds = $('HLS1050_renter_info_ds');
+                var total_beds = $('arrangement_confirm').params.record.data['house_beds'];
+                var used_beds = $('HLS1050_arranged_renters_ds').getAll().length;
+                var undetermined_beds = $('HLS1050_renter_info_ds').getAll().length;
+                if ((used_beds + undetermined_beds) < total_beds) {
+                    ds.create();//创建一个空的ds,即增加新的住户
+                } else {
+                    Aurora.showInfoMessage('入住提示','床位已满!',null,null,null);
+                }
+            }
+            //删除一条记录
+            function HLS1050_record_clear(){
+                $('checkin_det').clear();
+            }
+       ]]></script>
+        <a:dataSets>
+            <!--新增入住人员信息-->
+            <a:dataSet id="HLS_create_people_info_ds"  selectable="true" model="hls_rent.RENT400.checkin_save">
+                <!--<a:datas>-->
+                    <!--<a:record h_contract_number="${/parameter/@h_contract_number}"/>-->
+                <!--</a:datas>-->
+                <a:fields>
+                    <a:field name="staff_no"  lovGridHeight="300" lovHeight="500" lovService="hls_rent.RENT400.hls_hsm_info" lovWidth="600" required="true" title="入住人员信息">
+                        <a:mapping>
+                            <a:map from="staff_no" to="staff_no"/>
+                            <a:map from="name" to="name"/>
+                            <a:map from="gender" to="gender"/>
+                            <a:map from="department" to="department"/>
+                            <a:map from="base_in" to="base_in"/>
+                            <a:map from="phone_number" to="phone_number"/>
+                            <a:map from="email" to="email"/>
+                            <a:map from="people_id" to="people_id"/>
+                            <!--<a:map from="leaving_date" to="leaving_date"/>-->
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="leaving_date" required="true" />
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="onSubmitSuccess_record_save"/>
+                </a:events>
+
+            </a:dataSet>
+            <!--根据房屋合同编号查询已入住人员信息-->
+            <a:dataSet id="HLS_checkin_people_info_query_ds"  selectable="true">
+                <a:datas>
+                    <a:record h_contract_number="${/parameter/@h_contract_number}"/>
+                </a:datas>
+            </a:dataSet>
+            <!--已入住人员信息结果集-->
+            <a:dataSet id="HLS_checkin_people_info_ds" autoQuery="true" queryDataSet="HLS_checkin_people_info_query_ds" model="hls_rent.RENT400.HLS_checkedIn_people_info">
+            </a:dataSet>
+            <!--房屋信息,合同信息,租金信息-->
+            <a:dataSet id="Hls_hsm_ds"  selectable="true" submitUrl="${/request/@context_path}/modules/hls_rent/RENT400/checkin_save.svc">
+                <a:datas dataSource="/model/link_path"/>
+                <a:fields>
+                    <a:field name="leaving_date"/>
+                    <a:field name="h_contract_number" />
+                    <a:field name="contract_start_date" />
+                    <a:field name="contract_finish_date" />
+                    <a:field name="contract_ID" />
+                    <a:field name="month_rent_price"/>
+                    <a:field name="tenancy_term"/>
+                    <a:field name="agency_fee"/>
+                    <a:field name="contract_invoice_tax"/>
+                    <a:field name="sum_price"/>
+                    <a:field name="contract_condition"/>
+                    <a:field name="contract_remark"/>
+                    <a:field name="room_id"  />
+                    <a:field name="room_type"/>
+                    <a:field name="room_area" />
+                    <a:field name="landlord_name" />
+                    <a:field name="landlord_tel" />
+                    <a:field name="intermediary" />
+                    <a:field name="intermediary_name"/>
+                    <a:field name="intermediary_tel"/>
+                    <a:field name="room_addr_country"/>
+                    <a:field name="room_addr_province" />
+                    <a:field name="room_addr_city" />
+                    <!--<a:field name="people_id"/>-->
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+                <a:box id="head_form" column="3" style="width:100%" >
+                    <a:textField name="h_contract_number" bindtarget="Hls_hsm_ds" editable="false" renderer="getValue" prompt="房屋合同编号"/>
+                    <a:datePicker name="contract_start_date" bindtarget="Hls_hsm_ds" editable="false" readOnly="true" prompt="合同开始日期"  renderer="getFormatDateValue"/>
+                    <a:datePicker name="contract_finish_date" bindtarget="Hls_hsm_ds" editable="false" readOnly="true" prompt="合同结束日期"  renderer="getFormatDateValue"/>
+                </a:box>
+                <a:grid  id="HLS_checkin_people_info_ds_grid" style="width:100%" bindtarget="HLS_checkin_people_info_ds" showRowNumber="true" marginHeight="300" marginWidth="370"  title="已入住人员信息">
+                    <a:columns>
+                        <a:column name="staff_no"  prompt="已入住人员工号" width="100" />
+                        <a:column name="name"  prompt="入住人员姓名" width="100"/>
+                        <a:column name="gender"  prompt="性别" width="100"/>
+                        <a:column name="department" prompt="所在部门" width="80"/>
+                        <a:column name="base_in" prompt="base地" width="80"/>
+                        <a:column name="phone_number" prompt="联系电话" width="80"/>
+                        <a:column name="email"  prompt="邮箱地址" width="80"/>
+                        <a:column name="leaving_date"  prompt="预计入住时间至" width="120"/>
+                    </a:columns>
+                </a:grid>
+                <a:grid  id="checkin_det" style="width:100%" bindtarget="HLS_create_people_info_ds" navBar="true" showRowNumber="true" height="300" selectable="true" title="新增入住人员">
+                    <a:toolBar>
+                        <a:button text="保存" click="record_save" width="80" />
+                        <a:button   text="新增" click="new_hsm" width="80" />
+                        <a:button   text="删除"  type="delete" width="80" />
+                    </a:toolBar>
+                    <a:columns>
+                        <a:column name="staff_no" editor="hls_hsm_lv" prompt="入住人员工号" width="100" />
+                        <a:column name="name"  prompt="入住人员姓名" width="100"/>
+                        <a:column name="gender"  prompt="性别" width="100"/>
+                        <a:column name="department" prompt="所在部门" width="80"/>
+                        <a:column name="base_in" prompt="base地" width="80"/>
+                        <a:column name="phone_number" prompt="联系电话" width="80"/>
+                        <a:column name="email"  prompt="邮箱地址" width="80"/>
+                        <a:column name="leaving_date" editor="hls_hsm_date" bindtarget="Hls_hsm_ds" prompt="预计入住时间至" width="120"/>
+                    </a:columns>
+                    <a:editors>
+                        <a:datePicker id="hls_hsm_date"/>
+                        <a:lov id="hls_hsm_lv"/>
+                    </a:editors>
+                </a:grid>
+            <a:form id="search_room_info" style="width:100%"  title="房屋信息">
+                <a:box column="3">
+                    <a:textField name="room_id"  bindtarget="Hls_hsm_ds" editable="false" prompt="房屋选择"/>
+                    <a:textField name="room_type" bindtarget="Hls_hsm_ds"  editable="false" prompt="房屋类型"/>
+                    <a:textField name="room_area" bindtarget="Hls_hsm_ds"  editable="false" prompt="房屋面积"/>
+                    <a:textField name="bed" bindtarget="Hls_hsm_ds" editable="false" prompt="床位" />
+                    <a:textField name="landlord_name" bindtarget="Hls_hsm_ds"  prompt="房东姓名"/>
+                    <a:textField name="landlord_tel" bindtarget="Hls_hsm_ds" editable="false" prompt="联系电话"/>
+                    <a:textField name="intermediary" bindtarget="Hls_hsm_ds" editable="false" prompt="中介名称"/>
+                    <a:textField name="intermediary_name" bindtarget="Hls_hsm_ds" editable="false" prompt="中介联系人"/>
+                    <a:textField name="intermediary_tel" bindtarget="Hls_hsm_ds" editable="false" prompt="中介联系电话"/>
+                    <a:textField name="room_addr_country" bindtarget="Hls_hsm_ds" editable="false" prompt="国家"/>
+                    <a:textField name="room_addr_province" bindtarget="Hls_hsm_ds" editable="false" prompt="省"/>
+                    <a:textField name="room_addr_city" bindtarget="Hls_hsm_ds" editable="false" prompt="市"/>
+                </a:box>
+            </a:form>
+            <a:box id="" style="width:100%" >
+                <a:textField name="message" bindtarget="Hls_hsm_ds" editable="false"   width="400"  prompt="房屋信息备注"/>
+            </a:box>
+            <a:form id="search_contract_info" style="width:100%"  title="租金信息">
+                <a:box column="3">
+                    <a:textField name="month_rent_price" bindtarget="Hls_hsm_ds" editable="false" prompt="月租金"/>
+                    <a:textField name="tenancy_term" bindtarget="Hls_hsm_ds" editable="false" prompt="租期"/>
+                    <a:textField name="agency_fee" bindtarget="Hls_hsm_ds" editable="false" prompt="中介费"/>
+                    <a:textField name="contract_invoice_tax" bindtarget="Hls_hsm_ds" editable="false" prompt="合同发票税" />
+                    <a:textField name="sum_price" bindtarget="Hls_hsm_ds" editable="false" prompt="总金额" />
+                    <a:textField name="remark" bindtarget="Hls_hsm_ds" editable="false" prompt="备注"  width="400"/>
+                </a:box>
+                <a:box column="1">
+                    <a:textField name="contract_remark" bindtarget="Hls_hsm_ds" prompt="合同备注"  width="600"/>
+                </a:box>
+            </a:form>
+            <a:box column="2">
+                <!--<a:button text="保存" click="record_save" width="80" />-->
+                <a:button text="返回" click="openWindow" width="80" />
+
+            </a:box>
+
+        </a:screenBody>
+    </a:view>
+</a:screen>

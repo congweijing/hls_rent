@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="HLS_CONTRACT_INFO">
+    <bm:fields>
+        <bm:field name="contract_ID" databaseType="NUMBER" datatype="java.lang.Long" physicalName="contract_ID" prompt="房屋合同ID"/>
+
+        <bm:field name="contract_condition" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="contract_condition" prompt="房屋合同状态"/>
+
+    </bm:fields>
+    <bm:features>
+        <f:standard-who xmlns:f="aurora.database.features"/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="contract_ID"/>
+    </bm:primary-key>
+    <bm:operations>
+        <!--<bm:operation name="query">-->
+            <!--<bm:query-sql><![CDATA[-->
+                    <!--SELECT * FROM HLS_Contract_info  #WHERE_CLAUSE#-->
+                <!--]]></bm:query-sql>-->
+        <!--</bm:operation>-->
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            begin
+                HLS_Contract_info_pkg.modifi_contract_condition(p_h_contract_number    =>    ${@h_contract_number});
+            end;
+           	]]></bm:update-sql>
+        </bm:operation>
+
+    </bm:operations>
+</bm:model>

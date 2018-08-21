@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" baseTable="fnd_country">
+    <bm:fields>
+        <bm:field name="country_code_description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="description" prompt="fnd_country.description"/>
+        <bm:field name="country_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="country_code" prompt="fnd_country.country_id"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                select f.country_id as country_code, f.description as country_code_description from fnd_country f where f.enabled_flag = 'Y' and f.country_id = 32
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

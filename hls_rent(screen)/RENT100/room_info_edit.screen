@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="room_no=${/parameter/@room_no}" model="hls_rent.RENT100.hls_room_info" rootPath="link_path" />
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+            //二级联动
+    		function onCountryUpdate(ds,record,name,value,oldvalue){
+    		    if(name == 'country_code'){
+    		        console.log(name);
+    		        console.log(value);
+    		        $('RENT100_provinceDs').setQueryParameter('country_code', value);
+					$('RENT100_provinceDs').query();
+    		    }
+    		    else if(name == 'province_code'){
+    		        console.log(name);
+    		        console.log(value);
+    		        $('RENT100_cityDs').setQueryParameter('province_code', value);
+					$('RENT100_cityDs').query();
+    		    }
+
+    		}
+    		//修改按钮
+    		function RENT100_updateRoomInfo(){
+    		//debugger;
+    		    var room_no = '${/parameter/@room_no}';
+    		    console.log(room_no);
+    		    $('RENT100_room_info_edit_ds').setSubmitUrl("${/request/@context_path}/autocrud/hls_rent.RENT100.hls_room_info/batch_update"+'?room_no='+room_no);
+                $('RENT100_room_info_edit_ds').submit();
+    		}
+    		//提交成功之后触发此函数
+            function onSubmitSuccess_roomInfoEditDs(){
+            //console.log("444");
+                //$('RENT100_room_info_input_ds').reset();
+                $('room_info_search_result_window').close();
+                RENT100_roomInfoSearch();
+            }
+
+
+    	]]></script>
+        <a:dataSets>
+            <!-- 房屋面积-->
+            <a:dataSet id="RENT100_roomAreaDs" lookupCode="HLS_HOUSE_AREA"/>
+            <!-- 床位数量-->
+            <a:dataSet id="RENT100_bedNumberDs" lookupCode="HLS_BED_NUMBER"/>
+            <!-- 房屋地址三级联动-->
+            <a:dataSet id="RENT100_countryDs" loadData="true" model="hls_rent.RENT100.fnd_country"/>
+            <a:dataSet id="RENT100_provinceDs"  model="hls_rent.RENT100.fnd_province"/>
+            <a:dataSet id="RENT100_cityDs" model="hls_rent.RENT100.fnd_city"/>
+            <a:dataSet id="RENT100_room_info_edit_ds" model="hls_rent.RENT100.hls_room_info" autoCreate="true">
+                <a:datas dataSource="/model/link_path"/>
+                <a:fields>
+                    <a:field name="room_type" required="true" displayField="code_value_name" options="RENT100_roomTypeDs1" returnField="room_type_code"  valueField="code_value"/>
+                    <a:field name="room_area" required="true" displayField="code_value_name" options="RENT100_roomAreaDs" returnField="room_area_code"  valueField="code_value"/>
+                    <a:field name="bed_free" required="true" displayField="code_value_name" options="RENT100_bedNumberDs" returnField="bed_free_code"  valueField="code_value"/>
+                    <a:field name="landlord_name" displayField="period_name" options="" required="true" returnField="period_name" valueField="period_name"/>
+                    <a:field name="landlord_tel" required="true"/>
+                    <a:field name="room_addr_country" required="true" displayField="country_code_description" options="RENT100_countryDs" returnField="country_code"  valueField="country_code"/>
+                    <a:field name="room_addr_province" required="true" displayField="province_code_description" options="RENT100_provinceDs" returnField="province_code"  valueField="province_code"/>
+                    <a:field name="room_addr_city" required="true" displayField="city_code_description" options="RENT100_cityDs" returnField="city_code"  valueField="city_code"/>
+                    <a:field name="room_abbr" displayField="currency_desc" options="" required="true" returnField="currency_code" valueField="currency_code"/>
+                    <a:field name="intermediary" required="true"/>
+                    <a:field name="intermediary_name" displayField="type_name" options="" required="true" returnField="exchange_rate_type" valueField="type_code"/>
+                    <a:field name="intermediary_tel" required="true"/>
+                    <a:field name="message"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="onCountryUpdate"/>
+                    <a:event name="submitsuccess" handler="onSubmitSuccess_roomInfoEditDs"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form id="" style="width:100%" title="房屋编号：${/parameter/@room_no}">
+                <a:box id="" column="3" style="width:100%">
+                    <a:comboBox name="room_type" bindtarget="RENT100_room_info_edit_ds" prompt="房屋类型"/>
+                    <a:comboBox name="room_area" bindtarget="RENT100_room_info_edit_ds" prompt="房屋面积"/>
+                    <a:comboBox name="bed_free" bindtarget="RENT100_room_info_edit_ds" prompt="床位"/>
+                    <a:textField name="landlord_name" bindtarget="RENT100_room_info_edit_ds" prompt="房东姓名"/>
+                    <a:textField name="landlord_tel" bindtarget="RENT100_room_info_edit_ds" prompt="联系电话"/>
+                    <!--<a:textField name="" bindtarget="" prompt="房屋地址"/>-->
+                </a:box>
+                <a:box id="" column="4" style="width:100%">
+                    <a:comboBox name="room_addr_country" bindtarget="RENT100_room_info_edit_ds" prompt="房屋地址：国家"/>
+                    <a:comboBox name="room_addr_province" bindtarget="RENT100_room_info_edit_ds" prompt="省"/>
+                    <a:comboBox name="room_addr_city" bindtarget="RENT100_room_info_edit_ds" prompt="市"/>
+
+                </a:box>
+                <a:box id="" column="3" style="width:100%">
+                    <a:textField name="room_abbr" bindtarget="RENT100_room_info_edit_ds" prompt="房屋简称"/>
+                    <a:textField name="intermediary" bindtarget="RENT100_room_info_edit_ds" prompt="中介名称"/>
+                    <a:textField name="intermediary_name" bindtarget="RENT100_room_info_edit_ds" prompt="中介联系人"/>
+                    <a:textField name="intermediary_tel" bindtarget="RENT100_room_info_edit_ds" prompt="中介联系电话"/>
+                    <a:textField name="message" bindtarget="RENT100_room_info_edit_ds" prompt="备注"/>
+                </a:box>
+                <a:screenTopToolbar>
+                    <a:toolbarButton click="RENT100_updateRoomInfo" text="修改" width="80"/>
+                </a:screenTopToolbar>
+            </a:form>
+
+        </a:screenBody>
+    </a:view>
+</a:screen>

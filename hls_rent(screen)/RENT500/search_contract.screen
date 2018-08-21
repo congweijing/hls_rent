@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="hls_house_contract_link" url="${/request/@context_path}/modules/hls_rent/RENT500/Search_detial.screen"/>
+        <a:link id="hls_house_contract_add" url="${/request/@context_path}/modules/hls_rent/RENT500/Create_contract.screen"/>
+        <a:link id="hls_house_contract_modification" url="${/request/@context_path}/modules/hls_rent/RENT500/modification.screen"/>
+        <a:screenBody>
+            <script><![CDATA[
+                    function hls_house_query() {
+                        $('hls_search_line_ds').query();
+                    }
+                    function hls_house_contract_link(value, record, name) {
+                              url = $('hls_house_contract_link').getUrl() + '?h_contract_number=' + record.get('h_contract_number');
+                              return '<a href="javascript:openWindow(\'' + url + '\');">' + value + '</a>';
+                    }
+                    function returnmain(){
+                    history.go(0);
+                }
+
+                     function openWindow(url) {
+                        new Aurora.Window({
+                            id: 'information_window',
+                            url: url,
+                            title: '合同信息确认',
+                            height:480,width:820
+                         });
+                     }
+                     function addWindow() {
+                        new Aurora.Window({
+                            id: 'new_information_window',
+                            url: $('hls_house_contract_add').getUrl(),
+                            title: '创建合同信息',
+                            height:480,width:820
+                         });
+                     }
+                     //修改按钮
+                     function modification(){
+                        if($('hls_search_line_ds').getSelected().length==0){
+                            Aurora.showErrorMessage( 'ERROR', '请至少选择一条记录！',null, 200, 100 );
+                            return false;
+                        }else if($('hls_search_line_ds').getSelected().length>1){
+                            Aurora.showErrorMessage( 'ERROR', '只能选择一条记录！',null, 200, 100 );
+                            return false;
+                        }else if($('hls_search_line_ds').getSelected().length==1){
+                            var records=$('hls_search_line_ds').getSelected();
+                            if(records[0].get('contract_condition')=='合同确认状态'){
+                                Aurora.showErrorMessage( 'ERROR', '该合同已确认，不能修改！！',null, 200, 100 );
+                                return false;
+                            }else{
+                                //var record=$('hls_search_line_ds').getSelected()[0];
+                                var h_contract_number=records[0].get('h_contract_number');
+                                furl = $('hls_house_contract_modification').getUrl() + '?h_contract_number=' + h_contract_number;
+                                new Aurora.Window({
+                                    id: 'modifi_information_window',
+                                    url: furl,
+                                    title: '修改合同信息',
+                                    height:480,width:820
+                                });
+                            }
+                        }
+
+                     }
+            //判断选中记录是否有效
+            function hls_contract_remove_confirm(){
+                if($('hls_search_line_ds').getSelected().length==0){
+                    Aurora.showErrorMessage( 'ERROR', '请至少选择一条记录！',null, 200, 100 );
+                    return false;
+                }else{
+                    var records=$('hls_search_line_ds').getSelected();
+                    for(i=0;i<records.length;i++){
+                        if(records[i].get('contract_condition')=='合同确认状态'){
+                            Aurora.showErrorMessage( 'ERROR', '合同状态已确认，不能删除！！',null, 200, 100 );
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+             //删除按钮
+             function hls_contract_remove(){
+                if(hls_contract_remove_confirm()){
+                    $('search_line_grid').remove();
+                }
+                return;
+             }
+
+            //判断电话号码是否有效
+            function validate_telNumber(record, name, value){
+                if(name == 'landlord_tel'){
+                    var landlord_tel = record.get('landlord_tel');
+                    if(typeof(landlord_tel) != 'undefined' && !Ext.isEmpty(landlord_tel)){
+                        if(!(/^1[3|4|5|8][0-9]\d{4,8}$/.test(landlord_tel))){
+                            return '请输入正确的手机号码';
+                        }
+                    }
+                    return true;
+                }
+            }
+            ]]></script>
+
+            <a:dataSets>
+                <a:dataSet id="HLS_HOUSE_TYPE_ds" lookupCode="HLS_HOUSE_TYPE"/>
+                <a:dataSet id="contract_condition_ds" lookupCode="CONTRACT_CONDITION"/>
+                <!--查询集-->
+                <a:dataSet id="hls_search_contract_ds">
+                    <a:fields>
+                        <a:field name="room_abbr"/>
+                        <a:field name="landlord_name"/>
+                        <a:field name="landlord_tel"  validator="validate_telNumber"/>
+                        <a:field name="room_type" displayField="code_value_name" options="HLS_HOUSE_TYPE_ds" returnField="code_value_name" valueField="code_value"/>
+                        <a:field name="intermediary"/>
+                        <a:field name="intermediary_name"/>
+                        <!--<a:field name="contract_start_date"/>-->
+                        <!--<a:field name="contract_finish_date"/>-->
+                        <a:field name="contract_start_date_begin"/>
+                        <a:field name="contract_finish_date_end"/>
+                        <a:field name="contract_condition" displayField="code_value_name" options="contract_condition_ds" returnField="code_value_name" valueField="code_value"/>
+                    </a:fields>
+                </a:dataSet>
+                <!--结果集-->
+                <a:dataSet id="hls_search_line_ds"  autoQuery="true"  queryDataSet="hls_search_contract_ds" model="hls_rent.RENT500.HLS_room_contract_info" selectable="true"  autoPageSize="true">
+                    <a:field name="h_contract_number"/>
+                    <a:field name="contract_condition"/>
+                </a:dataSet>
+            </a:dataSets>
+            <a:screenTopToolbar>
+                <a:gridButton click="hls_house_query" text="查询" width="80"/>
+                <!--<a:gridButton click="addWindow" text="新增" width="80"/>-->
+                <!--<a:gridButton click="modificationWindow" text="修改" width="80"/>-->
+            </a:screenTopToolbar>
+            <a:form id="search_contract_header" style="width:100%"  title="查询条件">
+                <a:box id="search_contract_header_box" column="3" style="width:100%">
+                    <a:textField name="room_abbr" bindtarget="hls_search_contract_ds" prompt="房屋简称"/>
+                    <a:textField name="landlord_name" bindtarget="hls_search_contract_ds" prompt="房东姓名"/>
+                    <a:textField name="landlord_tel" bindtarget="hls_search_contract_ds" prompt="联系电话"/>
+                    <a:comboBox name="room_type" bindtarget="hls_search_contract_ds" prompt="房屋类型"/>
+                    <a:textField name="intermediary" bindtarget="hls_search_contract_ds" prompt="中介名称"/>
+                    <a:textField name="intermediary_name" bindtarget="hls_search_contract_ds" prompt="中介联系人"/>
+                    <!--<a:datePicker name="contract_start_date" bindtarget="hls_search_contract_ds" prompt="合同开始日期从"/>-->
+                    <!--<a:datePicker name="contract_finish_date" bindtarget="hls_search_contract_ds" prompt="合同开始日期到"/>-->
+                    <a:datePicker name="contract_start_date_begin" bindtarget="hls_search_contract_ds" prompt="合同开始日期从"/>
+                    <a:datePicker name="contract_start_date_end" bindtarget="hls_search_contract_ds" prompt="合同开始日期到"/>
+                    <a:comboBox name="contract_condition" bindtarget="hls_search_contract_ds" prompt="租房合同状态"/>
+                </a:box>
+            </a:form>
+            <a:grid id="search_line_grid" bindTarget="hls_search_line_ds" marginHeight="121" marginWidth="45" navBar="true">
+                <a:toolBar>
+                    <a:button click="addWindow" text="新增" width="80"/>
+                    <a:button click="hls_contract_remove" text="删除" width="80" iconAlign="left"/>
+                    <a:button click="modification" text="修改" width="80"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="h_contract_number" renderer="hls_house_contract_link" prompt="房屋合同编号" width="140" />
+                    <a:column name="contract_start_date"  prompt="合同开始日期" width="100"/>
+                    <a:column name="contract_finish_date"  prompt="合同到期日期" width="100"/>
+                    <a:column name="room_abbr"  prompt="房屋简称" width="80"/>
+                    <a:column name="room_type"  prompt="房屋类型" width="80"/>
+                    <a:column name="bed"  prompt="床位" width="80"/>
+                    <a:column name="bed_used"  prompt="已住床位" width="80"/>
+                    <a:column name="bed_free"  prompt="剩余床位" width="80"/>
+                    <a:column name="landlord_name"  prompt="房东姓名" width="80"/>
+                    <a:column name="landlord_tel"  prompt="联系电话" width="120"/>
+                    <a:column name="intermediary"  prompt="中介名称" width="80"/>
+                    <a:column name="contract_condition"  prompt="房屋合同状态" width="120"/>
+                    <a:column name="contract_remark"  prompt="合同备注" width="80"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+<a:init-procedure/>
+<a:view>
+    <a:link id="pageLink_create_user" url="${/request/@context_path}/modules/hls_rent/RENT200/hls_hrms_hsm_staff_info_editor.screen"/>
+    <a:link id="pageLink_alter_user" url="${/request/@context_path}/modules/hls_rent/RENT200/hls_hrms_hsm_staff_info.screen"/>
+    <script><![CDATA[
+
+
+            <!--grid渲染函数-->
+            function HLS_staff_info_result_grid_ds(value, record, name){
+                //debugger;
+                console.log("33");
+                if(!record.isNew)
+                {
+                    var personnel_no = record.get('personnel_no');
+                    var perNo = '<a href="javascript:winOpen_edit_user(\'' + personnel_no + '\');">'+personnel_no+'</a>'
+                    if(name=='personnel_no')
+                    {
+                        return perNo;
+                    }
+                }
+                return '';
+            }
+
+            <!--显示入住人员信息-->
+            function winOpen_edit_user(personnel_no){
+                new Aurora.Window({
+                id:'hls_hrms_hsm_staff_info',
+					url:$('pageLink_alter_user').getUrl(),
+					params:{
+                    	personnel_no:personnel_no
+                    },
+					title:'${l:查看用户}',
+                    height:500,
+                    width:1000
+				});
+            }
+
+
+            <!--查询按钮-->
+            function HLS_staff_infoSearch(){
+            console.log('1');
+                $('HLS_staff_info_input').query();
+            }
+
+            <!--比较日期-->
+            function compareDate(start, end){
+                if(start > end){
+                    return false;
+                }
+                return true;
+            }
+
+            <!--判断日期是否有效-->
+            function validate_date(record, name, value){
+            console.log('panduan');
+                if(name == 'creation_date_from' || name == 'creation_date_to'){
+                    var start_date = record.get('creation_date_from');
+                    console.log('start_date有了');
+                    var end_date = record.get('creation_date_to');
+                    console.log('end_date有了');
+                    if(typeof(end_date) != 'undefined' && !Ext.isEmpty(end_date) && typeof(start_date) != 'undefined' && !Ext.isEmpty(start_date)){
+                        if(!compareDate(start_date, end_date)){
+                            return '${l:START_GREATER_THAN_END}';
+                        }
+                    }
+                    return true;
+                }
+            }
+
+            <!--判断电话号码是否有效-->
+            function validate_telNumber(record, name, value){
+                if(name == 'phone_number'){
+                    var phone_number = record.get('phone_number');
+                    if(typeof(phone_number) != 'undefined' && !Ext.isEmpty(phone_number)){
+                        if(!(/^1[3|4|5|8][0-9]\d{4,8}$/.test(phone_number))){
+                            return '请输入正确的手机号码';
+                        }
+                    }
+                    return true;
+                }
+            }
+                    ]]></script>
+
+    <a:dataSets>
+        <!-- 性别-->
+        <a:dataSet id="HLS_gender_Ds1" lookupCode="HLS211_GENDER"/>
+        <!-- 所在部门-->
+        <a:dataSet id="HLS_dept_Ds1" lookupCode="HLS_DEPT_TYPE"/>
+        <!-- base地-->
+        <a:dataSet id="HLS_base_Ds1" lookupCode="HLS_BASE_TYPE"/>
+        <!-- 入住人员状态-->
+        <a:dataSet id="HLS_status_Ds1" lookupCode="HLS_STAFF_STATUS"/>
+
+        <!-- 入住人员信息-->
+        <a:dataSet id="HLS_staff_info_input_ds1" autoCreate="true">
+
+            <a:fields>
+                <a:field name="staff_no" />
+                <a:field name="name" />
+                <a:field name="gender_code" />
+                <a:field name="gender"  displayField="code_value_name" options="HLS_gender_Ds1" returnField="gender_code"  valueField="code_value"/>
+                <a:field name="department_code" />
+                <a:field name="department"  displayField="code_value_name" options="HLS_dept_Ds1" returnField="department_code"  valueField="code_value"/>
+                <a:field name="base_in_code" />
+                <a:field name="base_in"  displayField="code_value_name" options="HLS_base_Ds1" returnField="base_in_code"  valueField="code_value"/>
+                <a:field name="phone_number" validator="validate_telNumber"/>
+                <a:field name="creation_date_from"/>
+                <a:field name="creation_date_to" validator="validate_date"/>
+                <a:field name="people_status_code" />
+                <a:field name="people_status" displayField="code_value_name" options="HLS_status_Ds1" returnField="people_status_code"  valueField="code_value_name"/>
+            </a:fields>
+            <!-- <a:events>
+                <a:event name="submitsuccess" handler="GLD5010_headerSubmitSuccess"/>
+            </a:events>-->
+        </a:dataSet>
+        <a:dataSet id="HLS_staff_info_input"  autoQuery="true" model="hls_rent.RENT200.hls_staff_info_search" queryDataSet="HLS_staff_info_input_ds1"  selectable="true"/>
+    </a:dataSets>
+    <a:screenBody>
+
+        <a:form id="" style="width:100%" title="查询条件">
+            <a:screenTopToolbar>
+                <a:toolbarButton click="HLS_staff_infoSearch" text="查询" width="80"/>
+            </a:screenTopToolbar>
+            <a:box id="" column="3" style="width:100%">
+                <a:textField name="staff_no" bindTarget="HLS_staff_info_input_ds1"  prompt="入住人员工号"/>
+                <a:textField name="name" bindTarget="HLS_staff_info_input_ds1" prompt="入住人员姓名"/>
+                <a:comboBox name="gender" bindTarget="HLS_staff_info_input_ds1" prompt="性别"/>
+                <a:comboBox name="department" bindTarget="HLS_staff_info_input_ds1" prompt="所在部门"/>
+                <a:comboBox name="base_in" bindTarget="HLS_staff_info_input_ds1" prompt="base地"/>
+                <a:textField name="phone_number" bindTarget="HLS_staff_info_input_ds1" prompt="联系电话"/>
+                <a:datePicker name="creation_date_from" bindTarget="HLS_staff_info_input_ds1" prompt="创建日期从"/>
+                <a:datePicker name="creation_date_to" bindTarget="HLS_staff_info_input_ds1" prompt="创建日期到"/>
+                <a:comboBox name="people_status" bindTarget="HLS_staff_info_input_ds1" prompt="入住人员状态"/>
+            </a:box>
+        </a:form>
+
+
+        <a:grid id="HLS_staff_info_result_grid" bindTarget="HLS_staff_info_input" marginHeight="121" marginWidth="45" navBar="true">
+            <!--<a:toolBar>-->
+                <!--<a:button click="grid_delete_user"  text="删除" width="80" iconAlign="left"/>-->
+                <!--<a:button click="winOpen_create_user"  text="新增" width="80" iconAlign="left"/>-->
+            <!--</a:toolBar>-->
+            <a:columns>
+                <a:column name="personnel_no" editor="" prompt="入住人员编号" renderer="HLS_staff_info_result_grid_ds" width="100" />
+                <a:column name="staff_no" editor="" prompt="入住人员工号" width="100" />
+                <a:column name="name" editor="" prompt="入住人员姓名" width="100"/>
+                <a:column name="gender" editor="" prompt="性别" width="100"/>
+                <a:column name="department" editor="" prompt="所在部门" width="80"/>
+                <a:column name="base_in" editor="" prompt="base地" width="80"/>
+                <a:column name="phone_number" editor="" prompt="联系电话" width="80"/>
+                <a:column name="email" editor="" prompt="邮箱地址" width="80"/>
+                <a:column name="message" editor="" prompt="备注" width="120"/>
+                <!--<a:column name="creation_date" editor="" prompt="创建日期" width="120"/>-->
+                <a:column name="created_date" editor="" prompt="创建的日期" width="120"/>
+                <a:column name="people_status" editor="" prompt="入住人员状态" width="80"/>
+
+            </a:columns>
+
+        </a:grid>
+    </a:screenBody>
+</a:view>
+</a:screen>
+
+

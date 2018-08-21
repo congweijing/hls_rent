@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="HLS_CONTRACT_INFO">
+    <bm:fields>
+        <bm:field name="contract_ID" databaseType="NUMBER" datatype="java.lang.Long" physicalName="contract_ID" prompt="房屋合同ID"/>
+        <bm:field name="h_contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="H_CONTRACT_NUMBER" prompt="房屋合同编号"/>
+        <bm:field name="contract_start_date" databaseType="DATE" datatype="java.util.Date" physicalName="CONTRACT_START_DATE" prompt="合同开始日期"/>
+        <bm:field name="contract_finish_date" databaseType="DATE" datatype="java.util.Date" physicalName="CONTRACT_FINISH_DATE" prompt="合同结束日期"/>
+        <bm:field name="room_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ROOM_ID" prompt="房屋ID"/>
+        <bm:field name="month_rent_price" databaseType="NUMBER" datatype="java.lang.Long" physicalName="MONTH_RENT_PRICE" prompt="月租金"/>
+        <bm:field name="tenancy_term" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TENANCY_TERM" prompt="租期"/>
+        <bm:field name="agency_fee" databaseType="NUMBER" datatype="java.lang.Long" physicalName="AGENCY_FEE" prompt="中介费"/>
+        <bm:field name="contract_invoice_tax" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_INVOICE_TAX" prompt="合同发票税费"/>
+        <bm:field name="sum_price" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SUM_PRICE" prompt="总租金"/>
+        <bm:field name="currency" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CURRENCY" prompt="币种"/>
+        <bm:field name="remark" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REMARK" prompt="备注"/>
+        <bm:field name="contract_remark" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_REMARK" prompt="合同备注"/>
+
+    </bm:fields>
+    <bm:features>
+        <f:standard-who xmlns:f="aurora.database.features"/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="contract_ID"/>
+    </bm:primary-key>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                    SELECT * FROM HLS_Contract_info  #WHERE_CLAUSE#
+                ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            begin
+                HLS_Contract_info_pkg.update_contract_info(
+                                 p_h_contract_number    =>    ${@h_contract_number},
+                                 p_contract_start_date  =>    to_date(${@contract_start_date},'yyyy-mm-dd'),
+                                 p_contract_finish_date =>    to_date(${@contract_finish_date},'yyyy-mm-dd'),
+                                 p_room_id              =>    ${@room_id},
+                                 p_month_rent_price     =>    ${@month_rent_price},
+                                 p_tenancy_term         =>    ${@tenancy_term},
+                                 p_agency_fee           =>    ${@agency_fee},
+                                 p_Contract_invoice_tax =>    ${@contract_invoice_tax},
+                                 p_sum_price            =>    ${@sum_price},
+                                 p_currency             =>    ${@currency},
+                                 p_remark               =>    ${@remark},
+                                 p_contract_remark      =>    ${@contract_remark});
+            end;
+           	]]></bm:update-sql>
+        </bm:operation>
+
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query  defaultWhereClause="personnel_no=${/parameter/@personnel_no}" model="hls_rent.RENT200.hls_staff_info_search" rootPath="alter_model"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+            <!--页面关闭-->
+            function alterScreen_close(){
+                $('hls_hrms_hsm_staff_info').close();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="HLS_staff_info_input_ds" model="hls_rent.RENT200.hls_staff_info_search" autoCreate="true">
+                <a:datas dataSource="/model/alter_model"/>
+                <a:fields>
+                    <a:field name="personnel_no"  readOnly="true"/>
+                    <a:field name="staff_no" readOnly="true"/>
+                    <a:field name="name" readOnly="true"/>
+                    <a:field name="gender_code" readOnly="true"/>
+                    <a:field name="gender" required="true" displayField="code_value_name" options="HLS_gender_Ds1" returnField="gender_code"  valueField="code_value_name"/>
+                    <a:field name="department_code" readOnly="true"/>
+                    <a:field name="department" required="true" displayField="code_value_name" options="HLS_dept_Ds1" returnField="department_code"  valueField="code_value_name"/>
+                    <a:field name="base_in_code" readOnly="true"/>
+                    <a:field name="base_in" required="true" displayField="code_value_name" options="HLS_base_Ds1" returnField="base_in_code"  valueField="code_value_name"/>
+                    <a:field name="phone_number" readOnly="true"/>
+                    <a:field name="email" readOnly="true"/>
+                    <a:field name="message" readOnly="true"/>
+                </a:fields>
+                <!-- <a:events>
+                    <a:event name="submitsuccess" handler="GLD5010_headerSubmitSuccess"/>
+                </a:events> -->
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form style="width:100%" title="入住人员信息：${/parameter/@personnel_no}">
+                <a:box column="3" style="width:100%">
+                    <a:textField name="personnel_no" bindTarget="HLS_staff_info_input_ds" prompt="入住人员编号"/>
+                    <a:textField name="staff_no" bindTarget="HLS_staff_info_input_ds" prompt="入住人员工号"/>
+                    <a:textField name="name" bindTarget="HLS_staff_info_input_ds" prompt="入住人员姓名"/>
+                    <a:comboBox name="gender" bindTarget="HLS_staff_info_input_ds" prompt="性别"/>
+                    <a:comboBox name="department" bindTarget="HLS_staff_info_input_ds" prompt="所在部门"/>
+                    <a:comboBox name="base_in" bindTarget="HLS_staff_info_input_ds" prompt="base地"/>
+                    <a:textField name="phone_number" bindTarget="HLS_staff_info_input_ds" prompt="联系电话"/>
+                    <a:textField name="email" bindTarget="HLS_staff_info_input_ds" prompt="邮箱地址"/>
+                    <a:textField name="message" bindTarget="HLS_staff_info_input_ds" prompt="备注"/>
+                </a:box>
+                <a:screenTopToolbar>
+                    <a:toolbarButton click="alterScreen_close" text="关闭" width="80"/>
+                </a:screenTopToolbar>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>
+

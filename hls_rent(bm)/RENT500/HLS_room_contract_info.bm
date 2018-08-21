@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="HLS_CONTRACT_INFO" trace="true">
+    <bm:fields>
+
+        <bm:field name="room_abbr" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_ABBR" prompt="HLS_ROOM_INFO.ROOM_ABBR"/>
+        <bm:field name="room_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_TYPE" prompt="HLS_ROOM_INFO.ROOM_TYPE"/>
+        <bm:field name="bed" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BED" prompt="HLS_ROOM_INFO.BED"/>
+        <bm:field name="bed_used" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BED_USED" prompt="HLS_ROOM_INFO.BED_USED"/>
+        <bm:field name="bed_free" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BED_FREE" prompt="HLS_ROOM_INFO.BED_FREE"/>
+        <bm:field name="landlord_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LANDLORD_NAME" prompt="HLS_ROOM_INFO.LANDLORD_NAME"/>
+        <bm:field name="landlord_tel" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LANDLORD_TEL" prompt="HLS_ROOM_INFO.LANDLORD_TEL"/>
+        <bm:field name="intermediary" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INTERMEDIARY" prompt="HLS_ROOM_INFO.INTERMEDIARY"/>
+        <bm:field name="intermediary_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INTERMEDIARY_NAME"  prompt="中介联系人"/>
+        <!--<bm:field name="contract_ID" databaseType="NUMBER" datatype="java.lang.Long" physicalName="contract_ID" prompt="房屋合同ID"/>-->
+        <bm:field name="h_contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="H_CONTRACT_NUMBER" prompt="房屋合同编号"/>
+        <bm:field name="contract_start_date" datatype="java.lang.String"/>
+        <bm:field name="contract_finish_date"  datatype="java.lang.String"/>
+        <bm:field name="room_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ROOM_ID" prompt="房屋ID"/>
+        <bm:field name="contract_remark" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_REMARK" prompt="合同备注"/>
+        <bm:field name="room_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="room_status" prompt="房屋状态"/>
+        <bm:field name="month_rent_price" databaseType="NUMBER" datatype="java.lang.Long" physicalName="month_rent_price" />
+        <bm:field name="tenancy_term" databaseType="NUMBER" datatype="java.lang.Long" physicalName="tenancy_term" />
+        <bm:field name="agency_fee" databaseType="NUMBER" datatype="java.lang.Long" physicalName="agency_fee" />
+        <bm:field name="contract_invoice_tax" databaseType="NUMBER" datatype="java.lang.Long" physicalName="contract_invoice_tax" />
+        <bm:field name="sum_price" databaseType="NUMBER" datatype="java.lang.Long" physicalName="sum_price" />
+        <bm:field name="remark" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="remark" />
+        <bm:field name="intermediary_tel" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INTERMEDIARY_TEL"  prompt="中介联系电话"/>
+        <bm:field name="room_area" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_AREA" forDisplay="true"  prompt="房屋面积"/>
+        <bm:field name="room_addr_country" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="room_addr_country"/>
+        <bm:field name="room_addr_province" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="room_addr_province" />
+        <bm:field name="room_addr_city" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="room_addr_city" />
+        <bm:field name="contract_condition" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="contract_condition" prompt="房屋合同状态"/>
+        <bm:field name="currency" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="currency"/>
+
+
+
+    </bm:fields>
+    <bm:features>
+        <f:standard-who xmlns:f="aurora.database.features"/>
+    </bm:features>
+    <!--<bm:primary-key>-->
+    <!--<bm:pk-field name="contract_id"/>-->
+    <!--</bm:primary-key>-->
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from (
+                select
+                hci.h_contract_number,
+                to_char(hci.contract_start_date,'yyyy-mm-dd') contract_start_date,
+                to_char(hci.contract_finish_date,'yyyy-mm-dd') contract_finish_date,
+                (sys_code_pkg.get_sys_code_value_name('HLS_HOUSE_TYPE', hri.room_type)) room_type,
+                (sys_code_pkg.get_sys_code_value_name('HLS_HOUSE_AREA', hri.room_area)) room_area,
+                hri.bed,
+                hri.bed_used,
+                hri.bed_free,
+                hri.intermediary,
+                hri.landlord_name,
+                hri.landlord_tel,
+                hci.contract_remark,
+                hri.room_status,
+                hri.intermediary_name,
+                hci.month_rent_price,
+                (select fc.description from fnd_country fc where fc.country_id = room_addr_country) room_addr_country,
+                (select fc.description from fnd_province fc where fc.province_id = room_addr_province) room_addr_province,
+                (select fc.description from fnd_city fc where fc.city_id = room_addr_city) room_addr_city,
+                hci.tenancy_term,
+                hci.agency_fee,
+                hci.contract_invoice_tax,
+                hci.sum_price,
+                hci.remark,
+                hri.room_id,
+                hri.intermediary_tel,
+                hri.room_abbr,
+                (sys_code_pkg.get_sys_code_value_name('CONTRACT_CONDITION', hci.contract_condition)) contract_condition,
+                hci.currency
+                from HLS_Contract_info hci LEFT JOIN hls_room_info hri ON hri.room_id=hci.room_id ) tt  #WHERE_CLAUSE#
+           	]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="room_abbr" queryExpression="tt.room_abbr like &apos;%&apos;||${@room_abbr}||&apos;%&apos;"/>
+        <bm:query-field name="intermediary_name" queryExpression="tt.intermediary_name =${@intermediary_name}"/>
+        <bm:query-field name="landlord_name" queryExpression="tt.landlord_name =${@landlord_name}"/>
+        <bm:query-field name="landlord_tel" queryExpression="tt.landlord_tel =${@landlord_tel}"/>
+        <bm:query-field name="room_type" queryExpression="tt.room_type =${@room_type}"/>
+        <bm:query-field name="intermediary" queryExpression="tt.intermediary =${@intermediary}"/>
+        <bm:query-field name="intermediary_name" queryExpression="tt.intermediary_name =${@intermediary_name}"/>
+        <bm:query-field name="contract_start_date_begin" queryExpression="tt.contract_start_date >= ${@contract_start_date_begin}" />
+        <bm:query-field name="contract_start_date_end" queryExpression="${@contract_start_date_end} >= tt.contract_start_date"/>
+        <bm:query-field name="contract_condition" queryExpression="tt.contract_condition =${@contract_condition}"/>
+        <!--<bm:query-field name="h_contract_number" queryExpression="tt.h_contract_number =${@h_contract_number}"/>-->
+    </bm:query-fields>
+</bm:model>
+

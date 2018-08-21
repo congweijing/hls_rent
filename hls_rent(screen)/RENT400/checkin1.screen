@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <!--<a:link id="hls_house_contract_link" url="${/request/@context_path}/modules/train/TRA1010/Search_detial.screen"/>-->
+        <!--<a:link id="hls_house_contract_add" url="${/request/@context_path}/modules/train/TRA1010/Create_contract.screen"/>-->
+        <!--<a:link id="hls_house_contract_modification" url="${/request/@context_path}/modules/train/TRA1010/modification.screen"/>-->
+        <a:link id="hls_checkin_detial_link" url="${/request/@context_path}/modules/hls_rent/RENT400/checkin2.screen"/>
+        <a:screenBody>
+            <script><![CDATA[
+
+
+                    function hls_house_query() {
+                        $('hls_search_line_ds').query();
+                    }
+
+                     function checkin_detial(){
+                     if($('hls_search_line_ds').getSelected().length==0){
+                            Aurora.showErrorMessage( 'ERROR', '请选择一条记录！',null, 200, 100 );
+                            return false;
+                        }else if($('hls_search_line_ds').getSelected().length>1){
+                            Aurora.showErrorMessage( 'ERROR', '只能选择一条记录！',null, 200, 100 );
+                            return false;
+                        }else{
+                            var recordno=$('hls_search_line_ds').getSelected()[0];
+                            var h_contract_number=recordno.get('h_contract_number');
+                            var record = $('hls_search_line_ds').getCurrentRecord();
+                            console.log(recordno);
+                            furl = $('hls_checkin_detial_link').getUrl() + '?h_contract_number=' + h_contract_number;
+                            new Aurora.Window({
+                                id: 'checkin_detial_window',
+                                url: furl,
+                                title: '入住人员详细信息',
+                                params: {
+                                    record: recordno,
+                                    winId: 'checkin_detial_window'
+                                },
+                                height:480,width:820
+                             });
+                        }
+                     }
+            ]]></script>
+            <a:dataSets>
+                <a:dataSet id="HLS_HOUSE_TYPE_ds" lookupCode="HLS_HOUSE_TYPE"/>
+                <!--<a:dataSet id="contract_condition_ds" lookupCode="CONTRACT_CONDITION"/>-->
+                <a:dataSet id="hls_search_contract_ds">
+                    <a:datas>
+                        <a:record contract_condition="合同确认状态"/>
+                    </a:datas>
+                    <a:fields>
+                        <a:field name="h_contract_number"/>
+                        <a:field name="room_abbr"/>
+                        <a:field name="landlord_name"/>
+                        <a:field name="landlord_tel"/>
+                        <a:field name="room_type" displayField="code_value_name" options="HLS_HOUSE_TYPE_ds" returnField="code_value_name" valueField="code_value"/>
+                        <a:field name="intermediary"/>
+                        <a:field name="intermediary_name"/>
+                        <a:field name="contract_start_date"/>
+                        <a:field name="contract_finish_date"/>
+                        <!--<a:field name="contract_condition" displayField="code_value_name" options="contract_condition_ds" returnField="code_value_name" valueField="code_value"/>-->
+                    </a:fields>
+                </a:dataSet>
+                <a:dataSet id="hls_search_line_ds" queryDataSet="hls_search_contract_ds" model="hls_rent.RENT500.HLS_room_contract_info" selectable="true"  autoPageSize="true" autoCreate="true">
+                    <a:field name="h_contract_number"/>
+                    <a:field name="contract_condition"/>
+                    <a:field name="room_id"/>
+                </a:dataSet>
+            </a:dataSets>
+            <a:screenTopToolbar>
+                <a:gridButton click="hls_house_query" text="查询" width="80"/>
+                <!--<a:gridButton click="addWindow" text="新增" width="80"/>-->
+                <!--<a:gridButton click="modificationWindow" text="修改" width="80"/>-->
+            </a:screenTopToolbar>
+            <a:form id="search_contract_header" style="width:100%"  title="查询条件">
+                <a:box id="search_contract_header_box" column="3" style="width:100%">
+                    <a:textField name="h_contract_number" bindtarget="hls_search_contract_ds" prompt="房屋合同编号"/>
+                    <a:textField name="room_abbr" bindtarget="hls_search_contract_ds" prompt="房屋简称"/>
+                    <a:comboBox name="room_type" bindtarget="hls_search_contract_ds" prompt="房屋类型"/>
+                    <a:textField name="landlord_name" bindtarget="hls_search_contract_ds" prompt="房东姓名"/>
+                    <a:textField name="landlord_tel" bindtarget="hls_search_contract_ds" prompt="联系电话"/>
+                    <a:textField name="intermediary" bindtarget="hls_search_contract_ds" prompt="中介名称"/>
+                    <a:textField name="intermediary_name" bindtarget="hls_search_contract_ds" prompt="中介联系人"/>
+                    <a:datePicker name="contract_start_date" bindtarget="hls_search_contract_ds" prompt="合同开始日期从"/>
+                    <a:datePicker name="contract_finish_date" bindtarget="hls_search_contract_ds" prompt="合同开始日期到"/>
+                    <!--<a:comboBox name="contract_condition" bindtarget="hls_search_contract_ds" prompt="租房合同状态"/>-->
+                </a:box>
+            </a:form>
+            <a:grid id="search_line_grid" bindTarget="hls_search_line_ds" marginHeight="121" marginWidth="45" navBar="true">
+                <a:columns>
+                    <a:column name="h_contract_number" prompt="房屋合同编号" width="140" />
+                    <a:column name="room_abbr"  prompt="房屋简称" width="80"/>
+                    <a:column name="room_type"  prompt="房屋类型" width="80"/>
+                    <a:column name="landlord_name"  prompt="房东姓名" width="80"/>
+                    <a:column name="landlord_tel"  prompt="联系电话" width="120"/>
+                    <a:column name="intermediary"  prompt="中介名称" width="80"/>
+                    <a:column name="bed"  prompt="床位" width="80"/>
+                    <a:column name="bed_used"  prompt="已住床位" width="80"/>
+                    <a:column name="bed_free"  prompt="剩余床位" width="80"/>
+                    <a:column name="contract_start_date"  prompt="合同开始日期" width="100"/>
+                    <a:column name="contract_finish_date"  prompt="合同到期日期" width="100"/>
+                    <a:column name="contract_condition"  prompt="房屋合同状态" width="120"/>
+                    <!--<a:column name="contract_remark"  prompt="合同备注" width="80"/>-->
+                </a:columns>
+                <a:toolBar>
+                    <a:button  click="checkin_detial" text="入住" width="80"/>
+                </a:toolBar>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

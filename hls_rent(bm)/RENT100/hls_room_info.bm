@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="HLS_ROOM_INFO">
+    <bm:fields>
+        <bm:field name="room_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ROOM_ID" prompt="HLS_ROOM_INFO.ROOM_ID"/>
+        <bm:field name="room_no" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_NO" prompt="HLS_ROOM_INFO.ROOM_NO"/>
+        <bm:field name="room_abbr" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_ABBR" prompt="HLS_ROOM_INFO.ROOM_ABBR"/>
+        <bm:field name="room_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_TYPE" prompt="HLS_ROOM_INFO.ROOM_TYPE"/>
+        <bm:field name="room_area" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_AREA" prompt="HLS_ROOM_INFO.ROOM_AREA"/>
+        <bm:field name="bed" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BED" prompt="HLS_ROOM_INFO.BED"/>
+        <bm:field name="bed_used" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BED_USED" prompt="HLS_ROOM_INFO.BED_USED"/>
+        <bm:field name="bed_free" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BED_FREE" prompt="HLS_ROOM_INFO.BED_FREE"/>
+        <bm:field name="landlord_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LANDLORD_NAME" prompt="HLS_ROOM_INFO.LANDLORD_NAME"/>
+        <bm:field name="landlord_tel" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LANDLORD_TEL" prompt="HLS_ROOM_INFO.LANDLORD_TEL"/>
+        <bm:field name="intermediary" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INTERMEDIARY" prompt="HLS_ROOM_INFO.INTERMEDIARY"/>
+        <bm:field name="intermediary_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INTERMEDIARY_NAME" prompt="HLS_ROOM_INFO.INTERMEDIARY_NAME"/>
+        <bm:field name="intermediary_tel" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INTERMEDIARY_TEL" prompt="HLS_ROOM_INFO.INTERMEDIARY_TEL"/>
+        <bm:field name="message" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MESSAGE" prompt="HLS_ROOM_INFO.MESSAGE"/>
+        <bm:field name="room_addr_country" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_ADDR_COUNTRY" prompt="HLS_ROOM_INFO.ROOM_ADDR_COUNTRY"/>
+        <bm:field name="room_addr_province" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_ADDR_PROVINCE" prompt="HLS_ROOM_INFO.ROOM_ADDR_PROVINCE"/>
+        <bm:field name="room_addr_city" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_ADDR_CITY" prompt="HLS_ROOM_INFO.ROOM_ADDR_CITY"/>
+        <bm:field name="room_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ROOM_STATUS" prompt="HLS_ROOM_INFO.ROOM_STATUS"/>
+        <bm:field name="create_date" datatype="java.lang.String"  prompt="HLS_ROOM_INFO.CREATION_DATE"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who xmlns:f="aurora.database.features"/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="room_id"/>
+    </bm:primary-key>
+    <bm:operations>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+            begin
+            hls_rent_pkg.insert_room_info(
+                                p_room_type     => ${@room_type_code},
+                                p_room_area     => ${@room_area_code},
+                                p_bed_free      => ${@bed_free_code},
+                                p_landlord_name => ${@landlord_name},
+                                p_landlord_tel  => ${@landlord_tel},
+                                p_room_addr_country  => ${@country_code},
+                                p_room_addr_province => ${@province_code},
+                                p_room_addr_city     => ${@city_code},
+                                p_room_abbr          => ${@room_abbr},
+                                p_intermediary       => ${@intermediary},
+                                p_intermediary_name  => ${@intermediary_name},
+                                p_intermediary_tel   => ${@intermediary_tel},
+                                p_message            => ${@message}
+            );
+            end;]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            begin
+            hls_rent_pkg.update_room_info(
+                                p_room_no           => ${@room_no},
+                                p_room_type         => ${@room_type_code},
+                                p_room_area         => ${@room_area_code},
+                                p_bed               => ${@bed_free_code},
+                                p_landlord_name     => ${@landlord_name},
+                                p_landlord_tel       => ${@landlord_tel},
+                                p_room_addr_country  => ${@country_code},
+                                p_room_addr_province => ${@province_code},
+                                p_room_addr_city     => ${@city_code},
+                                p_room_abbr          => ${@room_abbr},
+                                p_intermediary       => ${@intermediary},
+                                p_intermediary_name  => ${@intermediary_name},
+                                p_intermediary_tel   => ${@intermediary_tel},
+                                p_message            => ${@message}
+            );
+            end;]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+
+                SELECT
+                room_id,
+                room_no,
+                room_abbr,
+                (sys_code_pkg.get_sys_code_value_name('HLS_HOUSE_TYPE', room_type)) room_type,
+                (sys_code_pkg.get_sys_code_value_name('HLS_HOUSE_AREA', room_area)) room_area,
+                bed,
+                bed_used,
+                bed_free,
+                landlord_name,
+                landlord_tel,
+                intermediary,
+                intermediary_name,
+                intermediary_tel,
+                message,
+                (select fc.description from fnd_country fc where fc.country_id = room_addr_country) room_addr_country,
+                (select fc.description from fnd_province fc where fc.province_id = room_addr_province) room_addr_province,
+                (select fc.description from fnd_city fc where fc.city_id = room_addr_city) room_addr_city,
+                (sys_code_pkg.get_sys_code_value_name('HLS_HOUSE_STATUS', room_status)) room_status,
+                to_char(creation_date, 'yyyy-mm-dd') create_date
+                FROM hls_room_info #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="room_abbr" queryExpression="room_abbr like &apos;%&apos;||${@room_abbr}||&apos;%&apos;"/>
+        <bm:query-field name="landlord_name" queryExpression="landlord_name = ${@landlord_name}"/>
+        <bm:query-field name="landlord_tel" queryExpression="landlord_tel = ${@landlord_tel}"/>
+        <bm:query-field name="room_type" queryExpression="room_type = ${@room_type_code}"/>
+        <bm:query-field name="room_no" queryExpression="room_no = ${@room_no}"/>
+        <bm:query-field name="creation_date_from" queryExpression="to_char(creation_date, 'yyyy-mm-dd') >= ${@creation_date_from}"/>
+        <bm:query-field name="creation_date_to" queryExpression=" ${@creation_date_to} >= to_char(creation_date, 'yyyy-mm-dd')"/>
+        <bm:query-field name="room_status" queryExpression="room_status = ${@room_status_code}"/>
+    </bm:query-fields>
+</bm:model>

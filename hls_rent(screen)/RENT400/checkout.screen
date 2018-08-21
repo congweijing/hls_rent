@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:view>
+        <a:link id="hls_house_contract_link" url="${/request/@context_path}/modules/hls_rent/RENT500/Search_detial.screen"/>
+
+        <script><![CDATA[
+                    function formatDate(value,record,name){
+                        return value.substring(0,10);
+                    }
+                    function hls_house_query() {
+                    //debugger;
+                        $('hls_check_out_line_ds').query();
+                    }
+                    function hls_house_contract_link(value, record, name) {
+                              url = $('hls_house_contract_link').getUrl() + '?h_contract_number=' + record.get('contract_no');
+                              return '<a href="javascript:openWindow(\'' + url + '\');">' + value + '</a>';
+                    }
+                    function returnmain(){
+                        history.go(0);
+                    }
+
+                    function openWindow(url) {
+                        new Aurora.Window({
+                            id: 'information_window',
+                            url: url,
+                            title: '合同信息确认',
+                            height:480,width:820
+                         });
+                    }
+                    function check_out(){
+                        if($('hls_check_out_line_ds').getSelected().length==0){
+                            Aurora.showErrorMessage( 'ERROR', '请至少选择一条记录！',null, 200, 100 );
+                            return false;
+                        }
+
+                        if ($('HLS_check_out_date_ds').data.length == 0){
+                            Aurora.showInfoMessage('退房日期确认','退房日期不能为空',null,300,100);
+                            return;
+                        }
+                        else {
+                            var check_out_date = $('HLS_check_out_date_ds').getCurrentRecord().get('check_out_date');
+                        }
+                        var ds = $('hls_check_out_line_ds').getSelected();
+                        for (var i=0;i<ds.length;i++){
+                            var live_start_date = ds[i].data.live_start_date;
+                            console.log(live_start_date);
+                            if(live_start_date>check_out_date){
+                                Aurora.showInfoMessage('退房日期确认','退房日期不能早于入住日期！',null,300,100);
+                                return;
+                            }
+                            ds[i].data.check_out_date = check_out_date;
+
+                        }
+                        console.log(ds);
+                        Aurora.showConfirm('退房确认','是否退房？',checkoutfunction,null,300,100);
+                    }
+
+                     function checkoutfunction(){
+
+                        var record=$('hls_check_out_line_ds').getSelected();
+                        $('hls_check_out_line_ds').submitSelected();
+
+                        //Aurora.showInfoMessage('${l:PROMPT}', '退房成功!', null, 250, 100);
+                     }
+                     //保存成功触发函数
+                    function onSubmitSuccess_checkoutSave(){
+                        console.log("保存成功")
+                        hls_house_query();
+                    }
+            ]]></script>
+        <a:screenBody>
+            <a:dataSets>
+                <a:dataSet id="HLS_DEPT_TYPE_ds" lookupCode="HLS_DEPT_TYPE"/>
+                <a:dataSet id="HLS_SEX_ds" lookupCode="HLS211_GENDER"/>
+                <a:dataSet id="HLS_BASE_TYPE_DS" lookupCode="HLS_BASE_TYPE"/>
+                <a:dataSet id="HLS_check_out_date_ds">
+                    <a:field name="check_out_date"/>
+                </a:dataSet>
+                <!--查询集-->
+                <a:dataSet id="checkout_head_ds" autoCreate="true">
+                    <a:fields>
+                        <a:field name="staff_no"/>
+                        <a:field name="name"/>
+                        <a:field name="gender" displayField="code_value_name" options="HLS_SEX_ds" returnField="code_value" valueField="code_value"/>
+                        <a:field name="department" displayField="code_value_name" options="HLS_DEPT_TYPE_ds" returnField="code_value" valueField="code_value"/>
+                        <a:field name="base_in" displayField="code_value_name" options="HLS_BASE_TYPE_DS" returnField="code_value" valueField="code_value"/>
+                        <a:field name="phone_number" />
+                        <a:field name="room_abbr"/>
+                        <a:field name="live_start_date"/>
+                        <a:field name="leaving_date"/>
+                    </a:fields>
+                </a:dataSet>
+                <!--结果集-->
+                <a:dataSet id="hls_check_out_line_ds" autoQuery="true" queryDataSet="checkout_head_ds" model="hls_rent.RENT400.checkout" selectable="true" submitUrl="${/request/@context_path}/modules/hls_rent/RENT400/checkout_save.svc" >
+                    <a:fields>
+                        <a:field name="contract_no"/>
+                        <a:field name="room_id"/>
+                        <a:field name="room_type"/>
+                        <a:field name="live_start_date" />
+                        <a:field name="rent_dates"/>
+                        <a:field name="check_out_date"/>
+                    </a:fields>
+                    <a:events>
+                        <a:event name="submitsuccess" handler="onSubmitSuccess_checkoutSave"/>
+                    </a:events>
+                </a:dataSet>
+
+        </a:dataSets>
+            <a:form id="" style="width:100%" title="查询条件">
+                <a:screenTopToolbar>
+                    <a:toolbarButton click="hls_house_query" text="查询" width="80"/>
+                </a:screenTopToolbar>
+                <a:box id="" column="3" style="width:100%">
+                    <a:textField name="staff_no" bindtarget="checkout_head_ds" prompt="入住人员工号"/>
+                    <a:textField name="name" bindtarget="checkout_head_ds" prompt="入住人员姓名"/>
+                    <a:comboBox name="gender" bindtarget="checkout_head_ds" prompt="性别"/>
+                    <a:comboBox name="department" bindtarget="checkout_head_ds" prompt="所在部门"/>
+                    <a:comboBox name="base_in" bindtarget="checkout_head_ds" prompt="base地"/>
+                    <a:textField name="phone_number" bindtarget="checkout_head_ds" prompt="联系电话"/>
+                    <a:textField name="room_abbr" bindtarget="checkout_head_ds" prompt="房屋简称"/>
+                    <a:datePicker name="live_start_date" bindtarget="checkout_head_ds" prompt="入住日期从"/>
+                    <a:datePicker name="leaving_date" bindtarget="checkout_head_ds" prompt="入住日期到"/>
+                </a:box>
+            </a:form>
+            <a:grid  id="111" bindTarget="hls_check_out_line_ds" marginHeight="121" marginWidth="45" title="查询结果" navBar="true">
+                <!--<a:toolBar>-->
+                    <!--<a:button click="checkoutfunction" text="退房"  width="80" />-->
+                <!--</a:toolBar>-->
+                <a:columns>
+                    <a:column name="contract_no" prompt="房屋合同编号" renderer="hls_house_contract_link" width="120" />
+                    <a:column name="staff_no"  prompt="入住人员工号" width="100"/>
+                    <a:column name="name"  prompt="入住人员姓名" width="100"/>
+                    <a:column name="gender"  prompt="性别" width="80"/>
+                    <a:column name="department"  prompt="所在部门" width="80"/>
+                    <a:column name="base_in"  prompt="base地" width="80"/>
+                    <a:column name="phone_number"  prompt="联系电话" width="100"/>
+                    <a:column name="room_abbr"  prompt="房屋简称" width="80"/>
+                    <a:column name="room_type"  prompt="房屋类型" width="80"/>
+                    <a:column name="live_start_date" prompt="入住日期" width="160" renderer="Aurora.formatDate"/>
+                    <a:column name="rent_dates" prompt="入住天数" width="80"/>
+                    <a:column name="people_status" prompt="入住人员状态" width="120"/>
+                </a:columns>
+                <!--<a:box>-->
+                    <!--<a:datePicker name="check_out_date" />-->
+                    <!--<a:button  text="退房"  width="80" />-->
+                    <!---->
+                <!--</a:box>-->
+            </a:grid>
+            <a:hBox>
+                <a:datePicker name="check_out_date" bindTarget="HLS_check_out_date_ds" prompt="退房日期">
+
+                </a:datePicker>
+                <a:toolbarButton click="check_out" text="退房"/>
+            </a:hBox>
+        </a:screenBody>
+    </a:view>
+</a:screen>

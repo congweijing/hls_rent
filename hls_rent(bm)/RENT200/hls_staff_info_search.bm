@@ -1,0 +1,99 @@
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" baseTable="hls_hsm" alias="h" >
+    <bm:fields>
+        <bm:field name="people_id"  databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="personnel_no"  databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="staff_no" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="gender" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="department" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="base_in" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="phone_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <!--<bm:field name="creation_date" databaseType="VARCHAR2" datatype="java.lang.String"/>-->
+        <bm:field name="people_status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="email" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="message" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="created_date" datatype="java.lang.String"  prompt="HLS_ROOM_INFO.CREATION_DATE"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who xmlns:f="aurora.database.features"/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="people_id"/>
+    </bm:primary-key>
+
+    <bm:operations>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+            begin
+            hls_rent_pkg.insert_people_info(
+                                p_staff_no     => ${@staff_no},
+                                p_name         => ${@name},
+                                p_gender       => ${@gender_code},
+                                p_department   => ${@department_code},
+                                p_base_in      => ${@base_in_code},
+                                p_phone_number => ${@phone_number},
+                                p_email        => ${@email},
+                                p_message      => ${@message}
+            );
+            end;]]></bm:update-sql>
+        </bm:operation>
+
+
+
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            begin
+            hls_rent_pkg.update_people_info(
+                                p_personnel_no => ${@personnel_no},
+                                p_staff_no     => ${@staff_no},
+                                p_name         => ${@name},
+                                p_gender       => ${@gender_code},
+                                p_department   => ${@department_code},
+                                p_base_in      => ${@base_in_code},
+                                p_phone_number => ${@phone_number},
+                                p_email        => ${@email},
+                                p_message      => ${@message}
+            );
+            end;]]></bm:update-sql>
+        </bm:operation>
+
+
+
+
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT people_id,personnel_no,
+                staff_no,
+                name,
+                (sys_code_pkg.get_sys_code_value_name('HLS211_GENDER', gender)) gender,
+                (sys_code_pkg.get_sys_code_value_name('HLS_DEPT_TYPE', department)) department,
+                (sys_code_pkg.get_sys_code_value_name('HLS_BASE_TYPE', base_in)) base_in,
+                phone_number,
+                (sys_code_pkg.get_sys_code_value_name('HLS_STAFF_STATUS', people_status)) people_status,
+                email,
+                message,
+                contract_no ,
+                leaving_date,
+                live_start_date,
+                created_by,
+                last_updated_by,
+                last_update_date,
+                to_char(creation_date, 'yyyy-mm-dd') created_date
+                FROM hls_hsm #WHERE_CLAUSE#
+
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+
+        <bm:query-field name="staff_no" queryExpression="staff_no = ${@staff_no}"/>
+        <bm:query-field name="name" queryExpression="name = ${@name}"/>
+        <bm:query-field name="gender" queryExpression="gender = ${@gender_code}"/>
+        <bm:query-field name="department" queryExpression="department = ${@department_code}"/>
+        <bm:query-field name="base_in" queryExpression="base_in = ${@base_in_code}"/>
+        <bm:query-field name="phone_number" queryExpression="phone_number = ${@phone_number}"/>
+        <bm:query-field name="creation_date_from" queryExpression="to_char(creation_date, 'yyyy-mm-dd') >= ${@creation_date_from}"/>
+        <bm:query-field name="creation_date_to" queryExpression=" ${@creation_date_to} >= to_char(creation_date, 'yyyy-mm-dd')"/>
+        <bm:query-field name="people_status" queryExpression="people_status = ${@people_status_code}"/>
+    </bm:query-fields>
+</bm:model>

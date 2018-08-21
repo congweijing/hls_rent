@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:view>
+        <a:link id="pageLink_room_info_edit" url="${/request/@context_path}/modules/hls_rent/RENT100/room_info_edit.screen"/>
+        <a:link id="pageLink_room_info_new" url="${/request/@context_path}/modules/hls_rent/RENT100/room_info_new.screen"/>
+        <script><![CDATA[
+            //新增按钮
+            function RENT100_roomInfoAdd(){
+                new Aurora.Window({
+                    id:'room_info_new_window',
+                    url:$('pageLink_room_info_new').getUrl(),
+                    title:'新增房屋信息',
+                    height:400,
+                    width:800
+                })
+            }
+            //删除按钮
+            function RENT100_roomInfoRemove(){
+                //console.log($('RENT100_room_info_result_grid'));
+                //debugger;
+                if(hls_houses_remove_confirm()){
+                    $('RENT100_room_info_result_grid').remove();
+                }
+                return;
+            }
+            //判断选中记录是否有效
+            function hls_houses_remove_confirm(){
+                if($('RENT100_room_info_result_ds').getSelected().length==0){
+                    Aurora.showErrorMessage( 'ERROR', '请至少选择一条记录！',null, 200, 100 );
+                    return false;
+                }else{
+                    var records=$('RENT100_room_info_result_ds').getSelected();
+                    for(i=0;i<records.length;i++){
+                        if(records[i].get('room_status')=='已租住'){
+                            Aurora.showErrorMessage( 'ERROR', '房屋状态为已租住，不能删除！！',null, 200, 100 );
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            //查询按钮
+            function RENT100_roomInfoSearch(){
+            //console.log('1');
+                $('RENT100_room_info_result_ds').query();
+            }
+            //
+            function getNowFormatDate() {
+                var date = new Date();
+                var seperator1 = "-";
+                var year = date.getFullYear();
+                var month = date.getMonth() + 1;
+                var strDate = date.getDate();
+                if (month >= 1 && month <= 9) {
+                    month = "0" + month;
+                }
+                if (strDate >= 0 && strDate <= 9) {
+                    strDate = "0" + strDate;
+                }
+                var currentdate = year + seperator1 + month + seperator1 + strDate;
+                return currentdate;
+            }
+
+            //grid渲染函数
+            function RENT100_room_info_result_ds_grid(value, record, name){
+                //debugger;
+                if(!record.isNew)
+                {
+                    var room_no = record.get('room_no');
+                    var rlt = '<a href="javascript:RENT100_roomInfoEdit(\'' + room_no + '\');">'+room_no+'</a>'
+                    if(name=='room_no')
+                    {
+                        return rlt;
+                    }
+                }
+                return '';
+            }
+            //编辑窗口
+            function RENT100_roomInfoEdit(room_no){
+                new Aurora.Window({
+                    id:'room_info_search_result_window',
+                    url:$('pageLink_room_info_edit').getUrl(),
+                    params:{
+                    	room_no:room_no
+                    },
+                    title:'修改房屋信息',
+                    height:500,
+                    width:830
+                });
+            }
+            //比较日期
+            function compareDate(start, end){
+                if(start > end){
+                    return false;
+                }
+                return true;
+            }
+            //判断日期是否有效
+            function validate_date(record, name, value){
+            //debugger;
+            //console.log(name);
+                if(name == 'creation_date_from' || name == 'creation_date_to'){
+                    var start_date = record.get('creation_date_from');
+                    //console.log(start_date);
+                    var end_date = record.get('creation_date_to');
+                    //console.log(end_date);
+                    if(typeof(end_date) != 'undefined' && !Ext.isEmpty(end_date) && typeof(start_date) != 'undefined' && !Ext.isEmpty(start_date)){
+                        if(!compareDate(start_date, end_date)){
+                            return '${l:START_GREATER_THAN_END}';
+                        }
+                    }
+                    return true;
+                }
+            }
+            //判断电话号码是否有效
+            function validate_telNumber(record, name, value){
+                if(name == 'landlord_tel'){
+                    var landlord_tel = record.get('landlord_tel');
+                    if(typeof(landlord_tel) != 'undefined' && !Ext.isEmpty(landlord_tel)){
+                        if(!(/^1[3|4|5|8][0-9]\d{4,8}$/.test(landlord_tel))){
+                            return '请输入正确的手机号码';
+                        }
+                    }
+                    return true;
+                }
+                if(name == 'intermediary_tel'){
+                    var intermediary_tel = record.get('intermediary_tel');
+                    if(typeof(intermediary_tel) != 'undefined' && !Ext.isEmpty(intermediary_tel)){
+                        if(!(/^1[3|4|5|8][0-9]\d{4,8}$/.test(intermediary_tel))){
+                            return '请输入正确的手机号码';
+                        }
+                    }
+                    return true;
+                }
+            }
+
+    	]]></script>
+        <a:dataSets>
+            <!-- 房屋类型-->
+            <a:dataSet id="RENT100_roomTypeDs1" lookupCode="HLS_HOUSE_TYPE"/>
+            <!-- 房屋状态-->
+            <a:dataSet id="RENT100_roomStatusDs" lookupCode="HLS_HOUSE_STATUS"/>
+            <!-- 查询集-->
+            <a:dataSet id="RENT100_room_info_query" autoCreate="true">
+                <a:fields>
+                    <a:field name="room_abbr"/>
+                    <a:field name="landlord_name"/>
+                    <a:field name="landlord_tel"  validator="validate_telNumber"/>
+                    <a:field name="room_type"  displayField="code_value_name" options="RENT100_roomTypeDs1" returnField="room_type_code"  valueField="code_value"/>
+                    <a:field name="creation_date_from" />
+                    <a:field name="creation_date_to" validator="validate_date"/>
+                    <a:field name="room_status" displayField="code_value_name" options="RENT100_roomStatusDs" returnField="room_status_code"  valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+            <!--结果集-->
+            <a:dataSet id="RENT100_room_info_result_ds"  autoQuery="true" model="hls_rent.RENT100.hls_room_info" queryDataSet="RENT100_room_info_query" selectable="true"/>
+
+        </a:dataSets>
+        <a:screenBody>
+            <a:form id="" title="查询条件">
+                <a:box id="" column="3" style="width:100%">
+                    <a:textField name="room_abbr" bindtarget="RENT100_room_info_query" prompt="房屋简称"/>
+                    <a:textField name="landlord_name" bindtarget="RENT100_room_info_query" prompt="房东姓名"/>
+                    <a:textField name="landlord_tel" bindtarget="RENT100_room_info_query" prompt="联系电话"/>
+                    <a:comboBox name="room_type" bindtarget="RENT100_room_info_query" prompt="房屋类型"/>
+                    <a:datePicker name="creation_date_from" bindtarget="RENT100_room_info_query" prompt="创建日期从"  />
+                    <a:datePicker name="creation_date_to" bindtarget="RENT100_room_info_query" prompt="创建日期到"/>
+                    <a:comboBox name="room_status" bindtarget="RENT100_room_info_query" prompt="房屋状态"/>
+                </a:box>
+                <a:screenTopToolbar>
+                    <a:toolbarButton click="RENT100_roomInfoSearch" text="查询" width="80"/>
+                </a:screenTopToolbar>
+            </a:form>
+            <a:grid id="RENT100_room_info_result_grid" bindTarget="RENT100_room_info_result_ds" marginHeight="121" marginWidth="45" navBar="true">
+                <a:columns>
+                    <a:column name="room_no" editor="" prompt="房屋编号" renderer="RENT100_room_info_result_ds_grid" width="120"  />
+                    <a:column name="room_abbr" align="center" editor="" prompt="房屋简称" width="100"/>
+                    <a:column name="room_type" align="center" editor="" prompt="房屋类型" width="100"/>
+                    <a:column name="bed_free" align="center" editor="" prompt="床位" width="80"/>
+                    <a:column name="landlord_name" align="center" editor="" prompt="房东姓名" width="80"/>
+                    <a:column name="landlord_tel" align="center" editor="" prompt="联系电话" width="120"/>
+                    <a:column name="intermediary" align="center" editor="" prompt="中介名称" width="120"/>
+                    <a:column name="room_addr_province" align="center" editor="" prompt="房屋地址省" width="100"/>
+                    <a:column name="room_addr_city" align="center" editor="" prompt="房屋地址市" width="100"/>
+                    <a:column name="room_status" align="center" editor="" prompt="房屋状态" width="80"/>
+                    <a:column name="create_date" align="center" editor="" prompt="创建日期" width="120" />
+                    <a:column name="message" editor="" prompt="备注" width="120"/>
+                </a:columns>
+                <!--<a:datePicker name="" prompt="退房日期"/>-->
+                <a:toolBar>
+                    <!--<a:link id="room_info_new" url="${/request/@context_path}/room_info_new.screen">-->
+                    <a:button click="RENT100_roomInfoRemove" text="删除" iconAlign="right" width="80" />
+                    <a:button click="RENT100_roomInfoAdd" text="新增" iconAlign="right" width="80" />
+                    <!--</a:link>-->
+                </a:toolBar>
+
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

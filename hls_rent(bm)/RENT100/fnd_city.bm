@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm"  alias="t1" baseTable="fnd_city">
+    <bm:fields>
+        <bm:field name="city_code_description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="description" prompt="fnd_city.description"/>
+        <bm:field name="city_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="city_id" prompt="fnd_city.city_id"/>
+    </bm:fields>
+    <bm:primary-key>
+        <bm:pk-field name="city_code"/>
+    </bm:primary-key>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                select p.city_id as city_code,p.description   as city_code_description FROM fnd_city p #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="province_code" queryExpression="p.province_id = ${@province_code} and p.enabled_flag = 'Y'"/>
+    </bm:query-fields>
+</bm:model>
